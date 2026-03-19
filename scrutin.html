@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrutin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c14;--bg2:#0d1120;--bg3:#111828;--bg4:#161d2e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e2eaf8;--textd:rgba(226,234,248,0.4);--textm:rgba(226,234,248,0.65);
+  --accent:#6c8ef5;--accent2:#a78bfa;
+  --grad:linear-gradient(135deg,#6c8ef5,#a78bfa);
+  --warn:#f59e0b;--danger:#ef4444;--ok:#10b981;
+  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.noise{position:fixed;inset:0;z-index:0;opacity:0.022;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.mesh{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.mb{position:absolute;border-radius:50%;filter:blur(100px);}
+.mb1{width:600px;height:600px;background:radial-gradient(circle,rgba(108,142,245,0.09),transparent 70%);top:-200px;right:-150px;animation:mbf 8s ease-in-out infinite;}
+.mb2{width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,0.07),transparent 70%);bottom:-100px;left:-150px;animation:mbf 8s ease-in-out infinite 4s;}
+.mb3{width:280px;height:280px;background:radial-gradient(circle,rgba(108,142,245,0.05),transparent 70%);top:45%;left:35%;animation:mbf 6s ease-in-out infinite 2s;}
+@keyframes mbf{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.08) translate(18px,-18px);}}
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.app{position:relative;z-index:2;max-width:480px;margin:0 auto;padding:22px 18px;min-height:100vh;display:flex;flex-direction:column;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--grad);box-shadow:0 4px 16px rgba(108,142,245,0.3);}
+.logo-txt{font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.4px;}
+.logo-txt span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ver{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid rgba(108,142,245,0.28);color:var(--accent);background:rgba(108,142,245,0.08);}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;flex:1;}
+.screen.active{display:flex;animation:si .32s cubic-bezier(.16,1,.3,1);}
+@keyframes si{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+/* DASHBOARD */
+.dash-greeting{margin-bottom:24px;}
+.dash-greeting h1{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px;margin-bottom:4px;}
+.dash-greeting p{font-size:13px;color:var(--textd);}
+
+/* HERO SCAN CARD */
+.hero-card{background:var(--bg2);border:1px solid rgba(108,142,245,0.2);border-radius:18px;padding:22px;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer;transition:all .22s;}
+.hero-card:hover{border-color:rgba(108,142,245,0.4);box-shadow:0 8px 32px rgba(108,142,245,0.12);transform:translateY(-1px);}
+.hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);opacity:0.4;}
+.hero-card-inner{display:flex;align-items:center;gap:16px;}
+.hero-card-icon{width:52px;height:52px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 16px rgba(108,142,245,0.3);}
+.hero-card-text h2{font-size:17px;font-weight:700;color:#fff;margin-bottom:3px;letter-spacing:-0.3px;}
+.hero-card-text p{font-size:13px;color:var(--textm);line-height:1.5;}
+.hero-card-arrow{margin-left:auto;color:var(--accent);opacity:0.6;flex-shrink:0;}
+.hero-card-tag{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(108,142,245,0.12);color:var(--accent);border:1px solid rgba(108,142,245,0.2);margin-top:10px;letter-spacing:0.5px;}
+
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.grid1{margin-bottom:10px;}
+
+/* CARDS */
+.dash-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.dash-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+.dash-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:0;transition:opacity .22s;}
+.dash-card:hover::after{opacity:1;}
+.dc-scan::after{background:var(--grad);}
+.dc-health::after{background:linear-gradient(90deg,#10b981,#34d399);}
+.dc-info::after{background:linear-gradient(90deg,#6c8ef5,#60a5fa);}
+.dc-ba::after{background:linear-gradient(90deg,#a78bfa,#c084fc);}
+.dc-hist::after{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.dc-prec::after{background:linear-gradient(90deg,#ef4444,#f87171);}
+.card-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;border:1px solid var(--border);}
+.dc-scan .card-icon{background:rgba(108,142,245,0.1);border-color:rgba(108,142,245,0.2);}
+.dc-health .card-icon{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.2);}
+.dc-info .card-icon{background:rgba(108,142,245,0.1);border-color:rgba(96,165,250,0.2);}
+.dc-ba .card-icon{background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.2);}
+.dc-hist .card-icon{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);}
+.dc-prec .card-icon{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);}
+.card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;letter-spacing:-0.2px;}
+.card-desc{font-size:11px;color:var(--textd);line-height:1.5;}
+
+/* WIDE CARD */
+.wide-card{display:flex;align-items:center;gap:14px;padding:16px;}
+.wide-card .card-icon{margin-bottom:0;flex-shrink:0;}
+.wide-card-text .card-title{margin-bottom:2px;}
+
+/* BUTTONS */
+.btn-p{width:100%;padding:14px 20px;background:var(--grad);border:none;border-radius:12px;font-family:var(--font);font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .22s;margin-bottom:10px;box-shadow:0 4px 20px rgba(108,142,245,0.28);letter-spacing:-0.1px;}
+.btn-p:hover{box-shadow:0 6px 28px rgba(108,142,245,0.42);transform:translateY(-1px);}
+.btn-p:active{transform:scale(0.98);}
+.btn-s{width:100%;padding:13px 20px;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:12px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--textm);cursor:pointer;transition:all .2s;}
+.btn-s:hover{background:rgba(255,255,255,0.07);color:var(--text);}
+.nav-bk{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--textd);cursor:pointer;margin-bottom:22px;width:fit-content;background:none;border:none;font-family:var(--font);transition:color .2s;}
+.nav-bk:hover{color:var(--accent);}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-hdr-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sec-hdr h2{font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.4px;}
+.sec-hdr p{font-size:12px;color:var(--textd);margin-top:1px;}
+
+/* CONNECT */
+.cc{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);opacity:0.3;}
+.sr{display:flex;align-items:flex-start;gap:14px;padding:12px 0;}
+.sr:not(:last-child){border-bottom:1px solid var(--border);}
+.sn{width:27px;height:27px;border-radius:8px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.22);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);}
+.st{font-size:14px;color:var(--textm);line-height:1.55;padding-top:3px;}
+.st strong{color:var(--text);font-weight:600;}
+.stbar{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:10px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.18);margin-bottom:16px;transition:all .5s;}
+.stbar.conn{background:rgba(16,185,129,0.07);border-color:rgba(16,185,129,0.25);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--warn);flex-shrink:0;animation:dp 1.2s ease-in-out infinite;}
+.stbar.conn .sdot{background:var(--ok);animation:none;}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.75);}}
+.stxt{font-size:13px;font-weight:500;color:var(--textd);}
+.stbar.conn .stxt{color:var(--ok);}
+
+/* SCANNING */
+.scp{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.sc-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-0.5px;}
+.sc-sub{font-size:13px;color:var(--textd);margin-bottom:26px;}
+.sci{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);opacity:.2;transition:opacity .5s,transform .3s;}
+.sci.active{opacity:1;transform:translateX(3px);}
+.sci.done{opacity:.6;}
+.sci-ic{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);transition:all .4s;}
+.sci.active .sci-ic{background:rgba(108,142,245,0.12);border-color:rgba(108,142,245,0.3);box-shadow:0 0 12px rgba(108,142,245,0.15);}
+.sci.done .sci-ic{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);}
+.sci-lbl{font-size:14px;font-weight:500;color:var(--textm);flex:1;}
+.sci-st{font-size:11px;font-family:var(--mono);color:var(--textd);}
+.sci.active .sci-st{color:var(--accent);}
+.sci.done .sci-st{color:var(--ok);}
+.pw2{margin-top:22px;background:var(--bg3);border-radius:99px;height:3px;overflow:hidden;}
+.pf{height:100%;background:var(--grad);border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1);width:0%;}
+.plbl{font-family:var(--mono);font-size:10px;color:var(--textd);text-align:right;margin-top:5px;}
+
+/* RESULTS */
+.rh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.di h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;letter-spacing:-0.4px;}
+.di p{font-size:12px;color:var(--textd);font-family:var(--mono);}
+.ts{text-align:right;}
+.tsn{font-size:34px;font-weight:800;background:linear-gradient(135deg,var(--warn),#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:-1.5px;}
+.tsl{font-size:10px;color:var(--textd);letter-spacing:0.5px;text-transform:uppercase;margin-top:2px;font-family:var(--mono);}
+.ob{padding:12px 16px 12px 20px;border-radius:10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.16);font-size:13px;font-weight:500;color:rgba(245,158,11,0.9);margin-bottom:14px;line-height:1.6;position:relative;}
+.ob::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--warn);border-radius:3px 0 0 3px;}
+.card2{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.card2:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+.card2::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;opacity:0;transition:opacity .2s;}
+.card2:hover::after{opacity:1;}
+.ok2::after{background:var(--ok);}
+.wn2::after{background:var(--warn);}
+.bd2::after{background:var(--danger);}
+.ch{display:flex;align-items:center;gap:12px;}
+.ci2{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.ok2 .ci2{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);}
+.wn2 .ci2{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);}
+.bd2 .ci2{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);}
+.cn{font-size:14px;font-weight:600;color:var(--text);}
+.cr{font-size:12px;color:var(--textd);margin-top:2px;}
+.sp2{font-family:var(--mono);font-size:9px;font-weight:600;padding:4px 9px;border-radius:20px;letter-spacing:0.5px;white-space:nowrap;}
+.ok2 .sp2{background:rgba(16,185,129,0.1);color:var(--ok);border:1px solid rgba(16,185,129,0.18);}
+.wn2 .sp2{background:rgba(245,158,11,0.1);color:var(--warn);border:1px solid rgba(245,158,11,0.18);}
+.bd2 .sp2{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.18);}
+.ar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;padding-bottom:20px;}
+.ab{padding:12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--textm);font-size:13px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:var(--font);}
+.ab:hover{background:rgba(255,255,255,0.06);color:var(--text);}
+.ab.sh{background:rgba(108,142,245,0.08);color:var(--accent);border-color:rgba(108,142,245,0.2);}
+.ab.sh:hover{background:rgba(108,142,245,0.15);}
+.disc{font-size:11px;color:rgba(226,234,248,0.18);text-align:center;line-height:1.7;padding-bottom:20px;}
+.rs,.ds,.bas,.hs,.infos,.precs{overflow-y:auto;}
+
+/* DETAIL */
+.dh{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.dbi{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.dtitle{font-size:20px;font-weight:700;color:#fff;letter-spacing:-0.5px;}
+.dstatus{font-size:12px;margin-top:3px;font-weight:500;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.sc2{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:13px;}
+.slbl{font-size:10px;color:var(--textd);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.7px;font-family:var(--mono);}
+.sv{font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
+.sv.w{color:var(--warn);}
+.sv.ok{color:var(--ok);}
+.sv.bd{color:var(--danger);}
+.ib{border-radius:11px;padding:15px;margin-bottom:10px;font-size:14px;line-height:1.7;color:var(--textm);}
+.ib.wb{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);}
+.ib.rdb{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.1);}
+.ib.okb{background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.1);}
+.ib.ab2{background:var(--bg2);border:1px solid var(--border);margin-bottom:14px;}
+.ib strong{color:var(--text);font-weight:600;}
+
+/* ACTION CARD */
+.action-card{border-radius:12px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;}
+.action-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.act-minor{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.12);}
+.act-minor::before{background:var(--ok);}
+.act-mod{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);}
+.act-mod::before{background:var(--warn);}
+.act-serious{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.14);}
+.act-serious::before{background:var(--danger);}
+.act-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;}
+.act-minor .act-label{color:var(--ok);}
+.act-mod .act-label{color:var(--warn);}
+.act-serious .act-label{color:var(--danger);}
+.act-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.act-body{font-size:13px;color:var(--textm);line-height:1.7;}
+.act-body strong{color:var(--text);font-weight:600;}
+.service-link{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 14px;background:rgba(108,142,245,0.08);border:1px solid rgba(108,142,245,0.18);border-radius:9px;text-decoration:none;transition:all .2s;cursor:pointer;}
+.service-link:hover{background:rgba(108,142,245,0.14);}
+.service-link-icon{font-size:18px;flex-shrink:0;}
+.service-link-text{flex:1;}
+.service-link-name{font-size:13px;font-weight:600;color:var(--accent);}
+.service-link-url{font-size:11px;color:var(--textd);font-family:var(--mono);margin-top:1px;}
+
+/* DIAGRAM CARD */
+.dg{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.dg::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);opacity:0.22;}
+.dg-lbl{font-family:var(--mono);font-size:10px;color:var(--textd);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:16px;}
+.bv{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.batt{width:200px;height:90px;border:2px solid rgba(108,142,245,0.35);border-radius:12px;position:relative;background:rgba(8,12,20,0.8);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);}
+.batt-tip{width:10px;height:30px;background:rgba(108,142,245,0.35);border-radius:0 5px 5px 0;position:absolute;right:-12px;top:50%;transform:translateY(-50%);}
+.batt-fill{position:absolute;left:5px;top:5px;bottom:5px;border-radius:7px;transition:width 1.6s cubic-bezier(.4,0,.2,1);}
+.batt-pct{font-size:22px;font-weight:700;color:#fff;position:relative;z-index:2;font-family:var(--mono);text-shadow:0 2px 8px rgba(0,0,0,0.8);}
+.health-row{display:flex;align-items:center;gap:16px;width:100%;}
+.rw{position:relative;width:88px;height:88px;flex-shrink:0;}
+.rw svg{transform:rotate(-90deg);}
+.rbg{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:8;}
+.rfg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1);}
+.rt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.rp{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;line-height:1;}
+.rl{font-size:9px;color:var(--textd);margin-top:2px;}
+.ri{flex:1;}
+.ri-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.ri-row:last-child{border:none;}
+.rk{color:var(--textd);}
+.rv{font-family:var(--mono);font-weight:600;}
+.rv.w{color:var(--warn);}
+.rv.ok{color:var(--ok);}
+.bstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;}
+.bst{text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 6px;}
+.bsv{font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;}
+.bsv.w{color:var(--warn);}
+.bsv.ok{color:var(--ok);}
+.bsl{font-size:10px;color:var(--textd);margin-top:3px;}
+.chip-scene{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.chip{width:190px;height:130px;background:var(--bg3);border:1.5px solid rgba(108,142,245,0.18);border-radius:10px;position:relative;display:flex;align-items:center;justify-content:center;}
+.chip-inner{width:88px;height:66px;border:1px solid rgba(108,142,245,0.3);border-radius:5px;background:rgba(108,142,245,0.04);display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:5px;}
+.chip-cell{border-radius:3px;animation:cblink 3s ease-in-out infinite;}
+.chip-cell:nth-child(2){animation-delay:.4s;}
+.chip-cell:nth-child(3){animation-delay:.8s;}
+.chip-cell:nth-child(4){animation-delay:1.2s;}
+@keyframes cblink{0%,100%{opacity:.2;}50%{opacity:.75;}}
+.chip-pins{position:absolute;display:flex;justify-content:space-around;}
+.chip-pins.top{top:-5px;left:22px;right:22px;}
+.chip-pins.bot{bottom:-5px;left:22px;right:22px;}
+.cp{width:6px;height:5px;border-radius:1px;background:rgba(108,142,245,0.4);}
+.chip-badge{position:absolute;top:7px;right:7px;font-family:var(--mono);font-size:8px;font-weight:600;padding:2px 6px;border-radius:4px;}
+.speed-bars{width:100%;display:flex;flex-direction:column;gap:12px;}
+.spb{display:flex;flex-direction:column;gap:5px;}
+.spb-hdr{display:flex;justify-content:space-between;align-items:center;}
+.spb-lbl{font-size:12px;font-weight:500;color:var(--textm);}
+.spb-vals{font-family:var(--mono);font-size:11px;}
+.spb-track{height:7px;background:var(--bg3);border-radius:99px;overflow:hidden;}
+.spb-fill{height:100%;border-radius:99px;transition:width 1.5s cubic-bezier(.4,0,.2,1);width:0%;}
+.cpu-scene{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.cpu-die{width:180px;height:180px;background:var(--bg3);border:1.5px solid rgba(108,142,245,0.18);border-radius:8px;padding:10px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:5px;}
+.cpu-block{border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:500;}
+.cpu-core{background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);color:rgba(108,142,245,0.8);animation:cpulse 2.5s ease-in-out infinite;}
+.cpu-core:nth-child(2){animation-delay:.3s;}.cpu-core:nth-child(3){animation-delay:.6s;}.cpu-core:nth-child(4){animation-delay:.9s;}.cpu-core:nth-child(5){animation-delay:1.2s;}.cpu-core:nth-child(6){animation-delay:1.5s;}.cpu-core:nth-child(7){animation-delay:1.8s;}.cpu-core:nth-child(8){animation-delay:2.1s;}
+@keyframes cpulse{0%,100%{background:rgba(108,142,245,0.1);}50%{background:rgba(108,142,245,0.22);box-shadow:0 0 8px rgba(108,142,245,0.2);}}
+.cpu-center{background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.22);color:rgba(167,139,250,0.7);font-size:7px;}
+.cpu-stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.disp-scene{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.disp-frame{width:168px;height:126px;border:2px solid rgba(108,142,245,0.3);border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+.disp-inner{width:152px;height:110px;border-radius:9px;background:var(--bg2);overflow:hidden;position:relative;}
+.px-grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(9,1fr);gap:1px;padding:2px;opacity:.5;}
+.px{border-radius:1px;animation:pxf 4s ease-in-out infinite;}
+@keyframes pxf{0%,100%{opacity:.1;}50%{opacity:.9;}}
+.disp-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(108,142,245,0.08),rgba(167,139,250,0.05));display:flex;align-items:center;justify-content:center;}
+.disp-label{text-align:center;}
+.disp-res{font-family:var(--mono);font-size:14px;font-weight:600;color:#fff;}
+.disp-hz{font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:2px;}
+.rbar-wrap{width:100%;height:5px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-top:6px;}
+.rbar{height:100%;background:var(--grad);border-radius:99px;animation:rb 1.11s linear infinite;}
+@keyframes rb{0%{transform:translateX(-100%);}100%{transform:translateX(500%);}}
+.disp-stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+/* HEALTH SCREEN */
+.health-overview{background:var(--bg2);border:1px solid rgba(16,185,129,0.18);border-radius:16px;padding:20px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden;}
+.health-overview::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--ok),transparent);opacity:0.4;}
+.health-score-big{font-size:56px;font-weight:800;background:linear-gradient(135deg,var(--ok),#34d399);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;line-height:1;}
+.health-score-label{font-size:13px;color:var(--textd);margin-top:4px;}
+.health-grade{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;background:rgba(16,185,129,0.12);color:var(--ok);border:1px solid rgba(16,185,129,0.22);margin-top:10px;letter-spacing:0.5px;}
+.health-bar-grid{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;}
+.hb{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:14px;}
+.hb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.hb-left{display:flex;align-items:center;gap:8px;}
+.hb-icon{font-size:16px;}
+.hb-name{font-size:13px;font-weight:600;color:var(--text);}
+.hb-pct{font-family:var(--mono);font-size:13px;font-weight:600;}
+.hb-track{height:6px;background:var(--bg3);border-radius:99px;overflow:hidden;}
+.hb-fill{height:100%;border-radius:99px;transition:width 1.4s cubic-bezier(.4,0,.2,1);width:0%;}
+.hb-sub{font-size:11px;color:var(--textd);margin-top:6px;}
+
+/* PHONE INFO */
+.info-section{margin-bottom:16px;}
+.info-sec-title{font-size:12px;font-weight:600;color:var(--textd);text-transform:uppercase;letter-spacing:0.8px;font-family:var(--mono);margin-bottom:10px;padding-left:2px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:13px;}
+.info-label{font-size:10px;color:var(--textd);text-transform:uppercase;letter-spacing:0.7px;font-family:var(--mono);margin-bottom:5px;}
+.info-value{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-0.2px;}
+.info-value.small{font-size:12px;}
+.info-full{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:8px;}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.info-row:last-child{border:none;}
+.info-row-key{color:var(--textd);}
+.info-row-val{font-family:var(--mono);font-weight:500;color:var(--text);font-size:12px;}
+
+/* BEFORE AFTER */
+.bat{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.brow{display:grid;grid-template-columns:1.2fr 1fr 1fr;}
+.bhr{background:rgba(108,142,245,0.04);border-bottom:1px solid var(--border);}
+.bc{padding:12px 14px;font-size:13px;font-weight:500;}
+.brow:not(.bhr):not(:last-child) .bc{border-bottom:1px solid var(--border);}
+.bc:not(:first-child){border-left:1px solid var(--border);}
+.bhr .bc{font-family:var(--mono);font-size:9px;color:var(--textd);letter-spacing:0.7px;text-transform:uppercase;font-weight:400;}
+.bok{color:var(--ok);}.bwn{color:var(--warn);}.bbd{color:var(--danger);}.blbl{color:var(--textm);}
+.cb{padding:13px 16px 13px 20px;border-radius:10px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);font-size:13px;font-weight:500;color:rgba(239,68,68,0.9);margin-bottom:16px;line-height:1.6;position:relative;}
+.cb::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--danger);border-radius:3px 0 0 3px;}
+
+/* HISTORY */
+.hist-empty{text-align:center;padding:40px 20px;}
+.hist-empty-icon{font-size:40px;margin-bottom:12px;opacity:0.4;}
+.hist-empty-text{font-size:14px;color:var(--textd);line-height:1.6;}
+.hist-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+.hist-item:hover{border-color:var(--border2);transform:translateY(-1px);}
+.hist-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.hist-device{font-size:14px;font-weight:600;color:var(--text);}
+.hist-score{font-family:var(--mono);font-size:13px;font-weight:700;}
+.hist-date{font-size:11px;color:var(--textd);font-family:var(--mono);}
+.hist-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.hist-tag{font-size:10px;padding:3px 8px;border-radius:20px;font-family:var(--mono);font-weight:500;}
+.hist-tag.ok{background:rgba(16,185,129,0.1);color:var(--ok);border:1px solid rgba(16,185,129,0.18);}
+.hist-tag.warn{background:rgba(245,158,11,0.1);color:var(--warn);border:1px solid rgba(245,158,11,0.18);}
+.hist-tag.bad{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.18);}
+
+/* PRECAUTIONS */
+.prec-tab{display:flex;gap:8px;margin-bottom:18px;}
+.ptab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:13px;font-weight:500;color:var(--textd);cursor:pointer;text-align:center;transition:all .2s;font-family:var(--font);}
+.ptab.active{background:rgba(108,142,245,0.1);border-color:rgba(108,142,245,0.25);color:var(--accent);}
+.prec-list{display:none;}
+.prec-list.active{display:flex;flex-direction:column;gap:10px;}
+.prec-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:15px;display:flex;align-items:flex-start;gap:12px;}
+.prec-num{width:26px;height:26px;border-radius:7px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);}
+.prec-content{}
+.prec-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.prec-desc{font-size:12px;color:var(--textd);line-height:1.6;}
+.prec-item.highlight{border-color:rgba(108,142,245,0.2);background:rgba(108,142,245,0.04);}
+.prec-item.warn-item{border-color:rgba(245,158,11,0.15);background:rgba(245,158,11,0.03);}
+.prec-item.warn-item .prec-num{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);color:var(--warn);}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="mesh"><div class="mb mb1"></div><div class="mb mb2"></div><div class="mb mb3"></div></div>
+<canvas id="cv"></canvas>
+
+<div class="app">
+  <div class="hdr">
+    <div class="logo">
+      <div class="logo-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <span class="logo-txt">Scru<span>tin</span></span>
+    </div>
+    <span class="ver">v0.1</span>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="screen active" id="dashboard">
+    <div class="dash-greeting">
+      <h1>Good evening 👋</h1>
+      <p>What would you like to do today?</p>
+    </div>
+
+    <!-- HERO SCAN CARD -->
+    <div class="hero-card" onclick="go('connect')">
+      <div class="hero-card-inner">
+        <div class="hero-card-icon">🔍</div>
+        <div class="hero-card-text">
+          <h2>Scan My Phone</h2>
+          <p>Detect fake or replaced components after a repair. Full fraud detection.</p>
+        </div>
+        <div class="hero-card-arrow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+      <span class="hero-card-tag">MAIN FEATURE</span>
+    </div>
+
+    <!-- 2x2 GRID -->
+    <div class="grid2">
+      <div class="dash-card dc-health" onclick="go('health')">
+        <div class="card-icon">❤️</div>
+        <div class="card-title">Health Check</div>
+        <div class="card-desc">Overall health score of your phone's components</div>
+      </div>
+      <div class="dash-card dc-info" onclick="go('phoneinfo')">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Phone Info</div>
+        <div class="card-desc">Full hardware details pulled from your device</div>
+      </div>
+      <div class="dash-card dc-ba" onclick="go('ba')">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Before / After</div>
+        <div class="card-desc">Compare your phone before and after repair</div>
+      </div>
+      <div class="dash-card dc-hist" onclick="go('history')">
+        <div class="card-icon">🕘</div>
+        <div class="card-title">History</div>
+        <div class="card-desc">View all your past scans and reports</div>
+      </div>
+    </div>
+
+    <!-- PRECAUTIONS WIDE CARD -->
+    <div class="dash-card dc-prec grid1" onclick="go('precautions')">
+      <div class="wide-card">
+        <div class="card-icon" style="margin-bottom:0">🛡️</div>
+        <div class="wide-card-text">
+          <div class="card-title">Precautions</div>
+          <div class="card-desc">How to keep your phone healthy and stay safe at repair shops</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--textd)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONNECT -->
+  <div class="screen" id="connect">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);">🔍</div>
+      <div><h2>Scan My Phone</h2><p>Connect your phone to get started</p></div>
+    </div>
+    <div class="cc">
+      <div class="sr"><div class="sn">01</div><div class="st">Plug your phone into your laptop via <strong>USB cable</strong></div></div>
+      <div class="sr"><div class="sn">02</div><div class="st">Go to <strong>Settings → About Phone</strong>, tap Build Number 7 times</div></div>
+      <div class="sr"><div class="sn">03</div><div class="st">Enable <strong>USB Debugging</strong> in Developer Options</div></div>
+      <div class="sr"><div class="sn">04</div><div class="st">Tap <strong>Allow</strong> when prompted on your phone</div></div>
+    </div>
+    <div class="stbar" id="stbar"><div class="sdot"></div><span class="stxt">Waiting for device connection...</span></div>
+    <button class="btn-p" onclick="startScan()">→ Start Scanning</button>
+    <button class="btn-s" style="margin-top:10px" onclick="go('dashboard')">Cancel</button>
+  </div>
+
+  <!-- SCANNING -->
+  <div class="screen" id="scanning">
+    <div class="scp">
+      <h2 class="sc-title">Scanning device</h2>
+      <p class="sc-sub">Keep your phone connected — do not unplug</p>
+      <div class="sci" id="si-bat"><div class="sci-ic">🔋</div><span class="sci-lbl">Battery info</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-sto"><div class="sci-ic">💾</div><span class="sci-lbl">Storage details</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-cpu"><div class="sci-ic">⚙️</div><span class="sci-lbl">Processor info</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-dsp"><div class="sci-ic">🖥️</div><span class="sci-lbl">Display specs</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-ai"><div class="sci-ic">🌐</div><span class="sci-lbl">Fetching official specs via AI</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-cmp"><div class="sci-ic">🔍</div><span class="sci-lbl">Comparing components</span><span class="sci-st">IDLE</span></div>
+      <div class="pw2"><div class="pf" id="pf"></div></div>
+      <div class="plbl" id="plbl">0%</div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="screen rs" id="results">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="rh">
+      <div class="di"><h2>Samsung Galaxy A52</h2><p>Scanned today · 18 Mar 2026</p></div>
+      <div class="ts"><div class="tsn">6<span style="font-size:18px;opacity:0.45">/10</span></div><div class="tsl">Trust Score</div></div>
+    </div>
+    <div class="ob">⚠ 2 components look suspicious. Battery and storage don't match original specs. Demand receipts.</div>
+    <div class="card2 wn2" onclick="go('det-bat')">
+      <div class="ch"><div class="ci2">🔋</div><div style="flex:1"><div class="cn">Battery</div><div class="cr">Capacity 37% below rated spec · tap for details</div></div><span class="sp2">SUSPICIOUS</span></div>
+    </div>
+    <div class="card2 bd2" onclick="go('det-sto')">
+      <div class="ch"><div class="ci2">💾</div><div style="flex:1"><div class="cn">Storage</div><div class="cr">Type downgraded UFS → eMMC · tap for details</div></div><span class="sp2">REPLACED</span></div>
+    </div>
+    <div class="card2 ok2" onclick="go('det-cpu')">
+      <div class="ch"><div class="ci2">⚙️</div><div style="flex:1"><div class="cn">Processor</div><div class="cr">Matches Snapdragon 720G spec exactly · tap for details</div></div><span class="sp2">GENUINE</span></div>
+    </div>
+    <div class="card2 ok2" onclick="go('det-dsp')">
+      <div class="ch"><div class="ci2">🖥️</div><div style="flex:1"><div class="cn">Display</div><div class="cr">1080×2400 · 90Hz matches exactly · tap for details</div></div><span class="sp2">GENUINE</span></div>
+    </div>
+    <div class="ar">
+      <button class="ab sh">📤 Share</button>
+      <button class="ab">📄 PDF</button>
+      <button class="ab">💾 Save</button>
+      <button class="ab" onclick="go('ba')">🔄 Before/After</button>
+    </div>
+    <p class="disc">Scrutin provides signals, not guarantees. Results indicate possibilities based on reported hardware data.</p>
+  </div>
+
+  <!-- DETAIL: BATTERY -->
+  <div class="screen ds" id="det-bat">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.22);">🔋</div>
+      <div><div class="dtitle">Battery</div><div class="dstatus" style="color:var(--warn);">⚠ Suspicious — needs attention</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="bv">
+        <div style="position:relative;"><div class="batt"><div class="batt-fill" id="batt-fill" style="width:0%"></div><div class="batt-tip"></div><span class="batt-pct" id="batt-pct">0%</span></div></div>
+        <div class="health-row">
+          <div class="rw">
+            <svg width="88" height="88" viewBox="0 0 88 88"><circle class="rbg" cx="44" cy="44" r="34"/><circle class="rfg" id="rfg" cx="44" cy="44" r="34" stroke="var(--warn)" stroke-dasharray="214" stroke-dashoffset="214"/></svg>
+            <div class="rt"><span class="rp" id="rpct">0%</span><span class="rl">Health</span></div>
+          </div>
+          <div class="ri">
+            <div class="ri-row"><span class="rk">Capacity</span><span class="rv w" id="ri-cap">—</span></div>
+            <div class="ri-row"><span class="rk">Official spec</span><span class="rv ok">4,500 mAh</span></div>
+            <div class="ri-row"><span class="rk">Cycle count</span><span class="rv w">3 cycles</span></div>
+            <div class="ri-row"><span class="rk">Verdict</span><span class="rv w">Replaced</span></div>
+          </div>
+        </div>
+        <div class="bstats">
+          <div class="bst"><div class="bsv w">2,800</div><div class="bsl">Scanned mAh</div></div>
+          <div class="bst"><div class="bsv ok">4,500</div><div class="bsl">Official mAh</div></div>
+          <div class="bst"><div class="bsv w">−37%</div><div class="bsl">Difference</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sg">
+      <div class="sc2"><div class="slbl">Scanned</div><div class="sv w">2,800 mAh</div></div>
+      <div class="sc2"><div class="slbl">Official</div><div class="sv ok">4,500 mAh</div></div>
+      <div class="sc2"><div class="slbl">Cycles</div><div class="sv w">3</div></div>
+      <div class="sc2"><div class="slbl">Health</div><div class="sv w">61%</div></div>
+    </div>
+    <div class="ib wb">Battery reporting 2,800 mAh — 37% below the original 4,500 mAh spec. Cycle count is only 3, meaning it was very recently replaced. A genuine new battery should be near 100% of rated capacity.</div>
+
+    <!-- ACTION GUIDANCE -->
+    <div class="action-card act-serious">
+      <div class="act-label">⚠ Recommended Action</div>
+      <div class="act-title">You were likely scammed</div>
+      <div class="act-body">The battery capacity is 37% below spec with only 3 charge cycles — this is a clear sign of a cheap replacement. <strong>Do not go back to that shop.</strong> Get it replaced with a genuine battery at a Samsung authorized service center. They provide a warranty on genuine parts.</div>
+      <div class="service-link">
+        <div class="service-link-icon">🏢</div>
+        <div class="service-link-text">
+          <div class="service-link-name">Samsung Care+ / Smart Café</div>
+          <div class="service-link-url">samsung.com/in/support</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <!-- DETAIL: STORAGE -->
+  <div class="screen ds" id="det-sto">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.22);">💾</div>
+      <div><div class="dtitle">Storage</div><div class="dstatus" style="color:var(--danger);">✕ Replaced with cheaper type</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="chip-scene">
+        <div class="chip">
+          <div class="chip-pins top"><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div></div>
+          <div class="chip-inner"><div class="chip-cell" style="background:rgba(239,68,68,0.3)"></div><div class="chip-cell" style="background:rgba(239,68,68,0.3)"></div><div class="chip-cell" style="background:rgba(239,68,68,0.3)"></div><div class="chip-cell" style="background:rgba(239,68,68,0.3)"></div></div>
+          <div class="chip-pins bot"><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div></div>
+          <div class="chip-badge" style="background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2);border-radius:4px;padding:2px 6px;">eMMC</div>
+        </div>
+        <div class="speed-bars">
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">Read Speed</span><span class="spb-vals"><span style="color:var(--danger)">180</span> / <span style="color:var(--ok)">410</span> MB/s</span></div><div class="spb-track"><div class="spb-fill" id="sp-read" style="background:linear-gradient(90deg,var(--danger),rgba(239,68,68,0.5))"></div></div></div>
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">Write Speed</span><span class="spb-vals"><span style="color:var(--danger)">90</span> / <span style="color:var(--ok)">210</span> MB/s</span></div><div class="spb-track"><div class="spb-fill" id="sp-write" style="background:linear-gradient(90deg,var(--danger),rgba(239,68,68,0.5))"></div></div></div>
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">UFS 2.1 Expected</span><span class="spb-vals" style="color:var(--ok)">410 MB/s</span></div><div class="spb-track"><div class="spb-fill" id="sp-exp" style="background:linear-gradient(90deg,var(--ok),rgba(16,185,129,0.5))"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sg">
+      <div class="sc2"><div class="slbl">Scanned</div><div class="sv bd">eMMC 5.1</div></div>
+      <div class="sc2"><div class="slbl">Official</div><div class="sv ok">UFS 2.1</div></div>
+      <div class="sc2"><div class="slbl">Read Speed</div><div class="sv bd">180 MB/s</div></div>
+      <div class="sc2"><div class="slbl">Expected</div><div class="sv ok">410 MB/s</div></div>
+    </div>
+    <div class="ib rdb">Storage changed from UFS 2.1 to eMMC 5.1. eMMC is a significantly cheaper and slower type. Your phone will feel noticeably sluggish. Storage type cannot change on its own — it was physically swapped during repair.</div>
+    <div class="action-card act-serious">
+      <div class="act-label">✕ Serious Issue Detected</div>
+      <div class="act-title">You were scammed — act now</div>
+      <div class="act-body">A storage chip swap is a deliberate act — this cannot happen accidentally. Your phone will be permanently slower until fixed. <strong>Don't go back to that shop.</strong> Get the original UFS 2.1 chip reinstalled at a Samsung authorized service center.</div>
+      <div class="service-link">
+        <div class="service-link-icon">🏢</div>
+        <div class="service-link-text">
+          <div class="service-link-name">Samsung Care+ / Smart Café</div>
+          <div class="service-link-url">samsung.com/in/support</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <!-- DETAIL: CPU -->
+  <div class="screen ds" id="det-cpu">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">⚙️</div>
+      <div><div class="dtitle">Processor</div><div class="dstatus" style="color:var(--ok);">✓ Genuine — matches official spec</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="cpu-scene">
+        <div class="cpu-die">
+          <div class="cpu-block cpu-core">C1</div><div class="cpu-block cpu-core">C2</div><div class="cpu-block cpu-core">C3</div>
+          <div class="cpu-block cpu-core">C4</div><div class="cpu-block cpu-center">GPU</div><div class="cpu-block cpu-core">C5</div>
+          <div class="cpu-block cpu-core">C6</div><div class="cpu-block cpu-core">C7</div><div class="cpu-block cpu-core">C8</div>
+        </div>
+        <div class="cpu-stats">
+          <div class="sc2"><div class="slbl">Chipset</div><div class="sv ok" style="font-size:13px">SD 720G</div></div>
+          <div class="sc2"><div class="slbl">Cores</div><div class="sv ok">8 cores</div></div>
+          <div class="sc2"><div class="slbl">Max Clock</div><div class="sv ok" style="font-size:13px">2.3 GHz</div></div>
+          <div class="sc2"><div class="slbl">Verdict</div><div class="sv ok" style="font-size:13px">Genuine</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ib okb">All 8 cores responding correctly. Chipset ID matches Snapdragon 720G exactly. No anomalies detected — this component appears completely untouched.</div>
+    <div class="action-card act-minor">
+      <div class="act-label">✓ No Action Needed</div>
+      <div class="act-title">Processor looks original</div>
+      <div class="act-body">Your processor matches manufacturer records perfectly. This is one of the hardest components to fake. <strong>No action required.</strong> Recheck after your next repair if any work is done to the motherboard.</div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <!-- DETAIL: DISPLAY -->
+  <div class="screen ds" id="det-dsp">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">🖥️</div>
+      <div><div class="dtitle">Display</div><div class="dstatus" style="color:var(--ok);">✓ Genuine — matches official spec</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="disp-scene">
+        <div class="disp-frame"><div class="disp-inner"><div class="px-grid" id="px-grid"></div><div class="disp-overlay"><div class="disp-label"><div class="disp-res">1080 × 2400</div><div class="disp-hz">90 Hz</div><div class="rbar-wrap"><div class="rbar"></div></div></div></div></div></div>
+        <div class="disp-stats">
+          <div class="sc2"><div class="slbl">Resolution</div><div class="sv ok" style="font-size:13px">FHD+</div></div>
+          <div class="sc2"><div class="slbl">Refresh</div><div class="sv ok">90 Hz</div></div>
+          <div class="sc2"><div class="slbl">Panel</div><div class="sv ok" style="font-size:13px">AMOLED</div></div>
+          <div class="sc2"><div class="slbl">Verdict</div><div class="sv ok" style="font-size:13px">Genuine</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ib okb">Resolution, refresh rate and panel type all match official specs. 90Hz AMOLED reporting correct parameters. No signs of a cheaper replacement panel.</div>
+    <div class="action-card act-minor">
+      <div class="act-label">✓ No Action Needed</div>
+      <div class="act-title">Display looks original</div>
+      <div class="act-body">Your display appears untouched. Display swaps usually show reduced brightness or lower refresh rate — neither detected here. <strong>No action required.</strong></div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <!-- HEALTH CHECK -->
+  <div class="screen hs" id="health">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">❤️</div>
+      <div><h2>Health Check</h2><p>Samsung Galaxy A52 · 18 Mar 2026</p></div>
+    </div>
+    <div class="health-overview">
+      <div class="health-score-big" id="health-score-big">0</div>
+      <div class="health-score-label">Overall Health Score</div>
+      <div class="health-grade" id="health-grade">Checking...</div>
+    </div>
+    <div class="health-bar-grid">
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">🔋</span><span class="hb-name">Battery</span></div><span class="hb-pct" style="color:var(--warn)" id="hb-bat-pct">0%</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-bat" style="background:linear-gradient(90deg,var(--warn),#fbbf24)"></div></div>
+        <div class="hb-sub">61% capacity · 3 cycles · Likely replaced</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">💾</span><span class="hb-name">Storage</span></div><span class="hb-pct" style="color:var(--ok)" id="hb-sto-pct">0%</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-sto" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub">128GB · 47GB used · Read/Write normal</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">⚙️</span><span class="hb-name">Processor</span></div><span class="hb-pct" style="color:var(--ok)" id="hb-cpu-pct">0%</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-cpu" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub">Snapdragon 720G · All 8 cores healthy</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">🌡️</span><span class="hb-name">Temperature</span></div><span class="hb-pct" style="color:var(--ok)" id="hb-tmp-pct">0%</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-tmp" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub">28°C avg · No overheating detected</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">🖥️</span><span class="hb-name">Display</span></div><span class="hb-pct" style="color:var(--ok)" id="hb-dsp-pct">0%</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-dsp" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub">90Hz AMOLED · No dead pixels detected</div>
+      </div>
+    </div>
+    <div class="action-card act-mod">
+      <div class="act-label">💡 Recommendation</div>
+      <div class="act-title">Battery needs attention soon</div>
+      <div class="act-body">Your phone is in good overall condition except for the battery which appears to be a cheap replacement. Consider getting a genuine battery from a <strong>Samsung authorized service center</strong> to restore full performance.</div>
+    </div>
+    <button class="btn-p" onclick="go('dashboard')">← Back to Dashboard</button>
+  </div>
+
+  <!-- PHONE INFO -->
+  <div class="screen infos" id="phoneinfo">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(108,142,245,0.1);border:1px solid rgba(96,165,250,0.2);">📱</div>
+      <div><h2>Phone Info</h2><p>Full hardware details · Samsung Galaxy A52</p></div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Device</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label">Model</div><div class="info-value small" id="info-model">—</div></div>
+        <div class="info-card"><div class="info-label">Brand</div><div class="info-value" id="info-brand">—</div></div>
+        <div class="info-card"><div class="info-label">Android</div><div class="info-value" id="info-android">—</div></div>
+        <div class="info-card"><div class="info-label">Chipset</div><div class="info-value small" id="info-chipset">—</div></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Display</div>
+      <div class="info-full">
+        <div class="info-row"><span class="info-row-key">Resolution</span><span class="info-row-val" id="info-res">—</span></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Battery</div>
+      <div class="info-full">
+        <div class="info-row"><span class="info-row-key">Level</span><span class="info-row-val" id="info-bat-lvl">—</span></div>
+        <div class="info-row"><span class="info-row-key">Health</span><span class="info-row-val" id="info-bat-hlt">—</span></div>
+        <div class="info-row"><span class="info-row-key">Temperature</span><span class="info-row-val" id="info-bat-tmp">—</span></div>
+        <div class="info-row"><span class="info-row-key">Voltage</span><span class="info-row-val" id="info-bat-vol">—</span></div>
+        <div class="info-row"><span class="info-row-key">Technology</span><span class="info-row-val" id="info-bat-tec">—</span></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Storage</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label">Total</div><div class="info-value" id="info-sto-tot">—</div></div>
+        <div class="info-card"><div class="info-label">Used</div><div class="info-value" id="info-sto-use">—</div></div>
+        <div class="info-card"><div class="info-label">Free</div><div class="info-value" id="info-sto-fre">—</div></div>
+        <div class="info-card"><div class="info-label">RAM Total</div><div class="info-value" id="info-ram-tot">—</div></div>
+        <div class="info-card"><div class="info-label">RAM Free</div><div class="info-value" id="info-ram-avl">—</div></div>
+      </div>
+    </div>
+    <div style="padding-bottom:20px;"></div>
+  </div>
+
+  <!-- BEFORE AFTER -->
+  <div class="screen bas" id="ba">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">🔄</div>
+      <div><h2>Before / After</h2><p>10 Mar 2026 → 18 Mar 2026</p></div>
+    </div>
+    <div class="bat">
+      <div class="brow bhr"><div class="bc">Component</div><div class="bc">Before</div><div class="bc">After</div></div>
+      <div class="brow"><div class="bc blbl">🔋 Battery</div><div class="bc bok">4,200 mAh</div><div class="bc bwn">2,800 mAh ⚠</div></div>
+      <div class="brow"><div class="bc blbl">💾 Storage</div><div class="bc bok">UFS 2.1</div><div class="bc bbd">eMMC 5.1 ✕</div></div>
+      <div class="brow"><div class="bc blbl">⚙️ CPU</div><div class="bc bok">SD 720G</div><div class="bc bok">SD 720G ✓</div></div>
+      <div class="brow"><div class="bc blbl">🖥️ Display</div><div class="bc bok">90 Hz</div><div class="bc bok">90 Hz ✓</div></div>
+    </div>
+    <div class="cb">✕ 2 changes detected after repair. Battery and storage were physically swapped. Strong evidence of component fraud.</div>
+    <div class="action-card act-serious">
+      <div class="act-label">✕ Fraud Detected</div>
+      <div class="act-title">2 components were swapped during repair</div>
+      <div class="act-body">Both battery and storage were replaced with cheaper alternatives. This is deliberate fraud. <strong>Visit a Samsung authorized service center</strong> to have both components restored with genuine parts.</div>
+      <div class="service-link">
+        <div class="service-link-icon">🏢</div>
+        <div class="service-link-text">
+          <div class="service-link-name">Samsung Care+ / Smart Café</div>
+          <div class="service-link-url">samsung.com/in/support</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <button class="btn-p">📤 Share This Report</button>
+    <button class="btn-s" style="margin-top:10px" onclick="go('dashboard')">Back to Dashboard</button>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="screen hs" id="history">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);">🕘</div>
+      <div><h2>Scan History</h2><p>Your past scans and reports</p></div>
+    </div>
+    <div class="hist-item" onclick="go('results')">
+      <div class="hist-item-header">
+        <div>
+          <div class="hist-device">Samsung Galaxy A52</div>
+          <div class="hist-date">18 Mar 2026 · Full Scan</div>
+        </div>
+        <div class="hist-score" style="color:var(--warn)">6/10</div>
+      </div>
+      <div class="hist-tags">
+        <span class="hist-tag warn">Battery suspicious</span>
+        <span class="hist-tag bad">Storage replaced</span>
+        <span class="hist-tag ok">CPU genuine</span>
+        <span class="hist-tag ok">Display genuine</span>
+      </div>
+    </div>
+    <div class="hist-item">
+      <div class="hist-item-header">
+        <div>
+          <div class="hist-device">Samsung Galaxy A52</div>
+          <div class="hist-date">10 Mar 2026 · Before Repair</div>
+        </div>
+        <div class="hist-score" style="color:var(--ok)">9/10</div>
+      </div>
+      <div class="hist-tags">
+        <span class="hist-tag ok">Battery genuine</span>
+        <span class="hist-tag ok">Storage genuine</span>
+        <span class="hist-tag ok">CPU genuine</span>
+        <span class="hist-tag ok">Display genuine</span>
+      </div>
+    </div>
+    <div style="padding-bottom:20px;"></div>
+  </div>
+
+  <!-- PRECAUTIONS -->
+  <div class="screen precs" id="precautions">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);">🛡️</div>
+      <div><h2>Precautions</h2><p>Stay informed. Stay protected.</p></div>
+    </div>
+    <div class="prec-tab">
+      <button class="ptab active" onclick="switchTab(0)">📱 Phone Health</button>
+      <button class="ptab" onclick="switchTab(1)">🔧 Before Repair</button>
+      <button class="ptab" onclick="switchTab(2)">✅ After Repair</button>
+    </div>
+
+    <!-- PHONE HEALTH TIPS -->
+    <div class="prec-list active" id="ptab-0">
+      <div class="prec-item highlight">
+        <div class="prec-num">01</div>
+        <div class="prec-content"><div class="prec-title">Keep battery between 20–80%</div><div class="prec-desc">Charging to 100% every time degrades your battery faster. Aim to keep it between 20–80% for maximum battery lifespan.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">02</div>
+        <div class="prec-content"><div class="prec-title">Avoid extreme temperatures</div><div class="prec-desc">Heat is your battery's biggest enemy. Don't leave your phone in direct sunlight or a hot car. Avoid using it while charging for long periods.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">03</div>
+        <div class="prec-content"><div class="prec-title">Use original or certified chargers only</div><div class="prec-desc">Cheap third-party chargers can deliver unstable voltage, damaging your battery and charging circuit over time.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">04</div>
+        <div class="prec-content"><div class="prec-title">Clear cache and storage regularly</div><div class="prec-desc">A phone over 80% full storage starts slowing down significantly. Regularly clear cache and move photos/files to cloud or PC.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">05</div>
+        <div class="prec-content"><div class="prec-title">Run a Scrutin health check monthly</div><div class="prec-desc">Track your phone's health over time. A sudden drop in battery capacity or performance can alert you early to problems.</div></div>
+      </div>
+    </div>
+
+    <!-- BEFORE REPAIR -->
+    <div class="prec-list" id="ptab-1">
+      <div class="prec-item highlight">
+        <div class="prec-num">01</div>
+        <div class="prec-content"><div class="prec-title">Always scan before handing over</div><div class="prec-desc">Run a Scrutin scan and save the report before giving your phone for any repair. This is your proof of original components.</div></div>
+      </div>
+      <div class="prec-item warn-item">
+        <div class="prec-num">02</div>
+        <div class="prec-content"><div class="prec-title">Note your IMEI and serial number</div><div class="prec-desc">Go to Settings → About Phone and screenshot your IMEI and serial number. This proves the device returned is actually yours.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">03</div>
+        <div class="prec-content"><div class="prec-title">Remove SIM and memory card</div><div class="prec-desc">Always remove your SIM card and SD card before handing over your phone. No repair requires access to these.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">04</div>
+        <div class="prec-content"><div class="prec-title">Ask for a written estimate first</div><div class="prec-desc">Get the repair cost and parts list in writing before they start. A trustworthy shop will always agree to this.</div></div>
+      </div>
+      <div class="prec-item warn-item">
+        <div class="prec-num">05</div>
+        <div class="prec-content"><div class="prec-title">Ask specifically for original parts</div><div class="prec-desc">Say clearly — "I want original manufacturer parts only." Ask them to show you the packaging when the part arrives.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">06</div>
+        <div class="prec-content"><div class="prec-title">Photograph your phone's condition</div><div class="prec-desc">Take clear photos of all sides of your phone before handing over. Protects you if they cause additional damage during repair.</div></div>
+      </div>
+    </div>
+
+    <!-- AFTER REPAIR -->
+    <div class="prec-list" id="ptab-2">
+      <div class="prec-item highlight">
+        <div class="prec-num">01</div>
+        <div class="prec-content"><div class="prec-title">Scan immediately after getting it back</div><div class="prec-desc">Run a Scrutin scan right there at the shop before you leave. If something looks off, you can address it on the spot.</div></div>
+      </div>
+      <div class="prec-item warn-item">
+        <div class="prec-num">02</div>
+        <div class="prec-content"><div class="prec-title">Check the repaired component first</div><div class="prec-desc">If they replaced the battery, check battery capacity. If they replaced the screen, check resolution and refresh rate. Don't just assume it's done right.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">03</div>
+        <div class="prec-content"><div class="prec-title">Verify the warranty seal</div><div class="prec-desc">Check if the warranty sticker is intact or has been tampered with. Most brands place these over screws — any tampering is a red flag.</div></div>
+      </div>
+      <div class="prec-item">
+        <div class="prec-num">04</div>
+        <div class="prec-content"><div class="prec-title">Ask for the old part back</div><div class="prec-desc">Always ask them to return the replaced component. A trustworthy shop will hand it over. If they refuse or say they "disposed" of it — be suspicious.</div></div>
+      </div>
+      <div class="prec-item warn-item">
+        <div class="prec-num">05</div>
+        <div class="prec-content"><div class="prec-title">If something looks off — go to an authorized center</div><div class="prec-desc">Don't go back to the same shop. Visit your brand's authorized service center — Samsung, Xiaomi, Realme, OnePlus, Apple — they use genuine parts and give you a warranty on the repair.</div></div>
+      </div>
+    </div>
+    <div style="padding-bottom:24px;"></div>
+  </div>
+
+</div>
+
+<script>
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='det-bat') initBattery();
+  if(id==='det-sto') initStorage();
+  if(id==='det-dsp') initDisplay();
+  if(id==='health') initHealth();
+}
+
+function switchTab(i) {
+  document.querySelectorAll('.ptab').forEach((t,idx) => t.classList.toggle('active', idx===i));
+  document.querySelectorAll('.prec-list').forEach((l,idx) => l.classList.toggle('active', idx===i));
+}
+
+// Store real scan data globally
+let scanData = null;
+
+function startScan() {
+  const b = document.getElementById('stbar');
+  // First check if phone is connected via API
+  fetch('http://127.0.0.1:5000/scan')
+    .then(res => res.json())
+    .then(data => {
+      scanData = data;
+      b.classList.add('conn');
+      b.querySelector('.stxt').textContent = '✓ ' + data.device.brand + ' ' + data.device.model + ' detected';
+      setTimeout(() => { go('scanning'); runScan(); }, 1200);
+    })
+    .catch(err => {
+      b.querySelector('.stxt').textContent = '✕ No device found. Is your phone connected?';
+    });
+}
+
+function runScan() {
+  const steps=[{id:'si-bat',p:'18%'},{id:'si-sto',p:'36%'},{id:'si-cpu',p:'54%'},{id:'si-dsp',p:'65%'},{id:'si-ai',p:'82%'},{id:'si-cmp',p:'100%'}];
+  let i=0;
+  function tick(){
+    if(i>0){const p=document.getElementById(steps[i-1].id);p.classList.remove('active');p.classList.add('done');p.querySelector('.sci-st').textContent='DONE ✓';}
+    if(i<steps.length){const c=document.getElementById(steps[i].id);c.classList.add('active');c.querySelector('.sci-st').textContent='SCANNING...';document.getElementById('pf').style.width=steps[i].p;document.getElementById('plbl').textContent=steps[i].p;i++;setTimeout(tick,900);}
+    else{setTimeout(()=>{ populateResults(); go('results'); },700);}
+  }
+  tick();
+}
+
+function populateResults() {
+  if (!scanData) return;
+  const d = scanData;
+
+  // Device name in results
+  document.querySelectorAll('.di h2').forEach(el => el.textContent = d.device.brand + ' ' + d.device.model);
+  document.querySelectorAll('.di p').forEach(el => el.textContent = 'Scanned just now · Android ' + d.device.android);
+
+  // Phone info screen
+  document.getElementById('info-brand').textContent   = d.device.brand;
+  document.getElementById('info-model').textContent   = d.device.model;
+  document.getElementById('info-android').textContent = d.device.android;
+  document.getElementById('info-chipset').textContent = d.device.chipset;
+  document.getElementById('info-res').textContent     = d.display.resolution;
+  document.getElementById('info-bat-lvl').textContent = d.battery.level + '%';
+  document.getElementById('info-bat-hlt').textContent = d.battery.health;
+  document.getElementById('info-bat-tmp').textContent = d.battery.temperature;
+  document.getElementById('info-bat-vol').textContent = d.battery.voltage;
+  document.getElementById('info-bat-tec').textContent = d.battery.technology;
+  document.getElementById('info-sto-tot').textContent = d.storage.total;
+  document.getElementById('info-sto-use').textContent = d.storage.used;
+  document.getElementById('info-sto-fre').textContent = d.storage.free;
+  document.getElementById('info-ram-tot').textContent = d.ram.total;
+  document.getElementById('info-ram-avl').textContent = d.ram.available;
+}
+
+function initBattery(){
+  const fill=document.getElementById('batt-fill'),pctEl=document.getElementById('batt-pct'),ring=document.getElementById('rfg'),rpct=document.getElementById('rpct'),capEl=document.getElementById('ri-cap');
+  const health=61,capacity=2800,fillPct=Math.round(capacity/4500*100);
+  setTimeout(()=>{
+    fill.style.width=fillPct+'%';fill.style.background='linear-gradient(90deg,var(--warn),rgba(245,158,11,0.6))';
+    let c=0;const ti=setInterval(()=>{c=Math.min(c+2,fillPct);pctEl.textContent=c+'%';if(c>=fillPct)clearInterval(ti);},28);
+    ring.style.strokeDashoffset=214-(health/100)*214;
+    let h=0;const hi=setInterval(()=>{h=Math.min(h+2,health);rpct.textContent=h+'%';if(h>=health)clearInterval(hi);},28);
+    let cv=0;const ci=setInterval(()=>{cv=Math.min(cv+80,capacity);capEl.textContent=cv.toLocaleString()+' mAh';if(cv>=capacity)clearInterval(ci);},28);
+  },300);
+}
+
+function initStorage(){
+  setTimeout(()=>{
+    document.getElementById('sp-read').style.width='43.9%';
+    document.getElementById('sp-write').style.width='42.8%';
+    document.getElementById('sp-exp').style.width='100%';
+  },300);
+}
+
+function initDisplay(){
+  const grid=document.getElementById('px-grid');
+  if(grid.children.length>0)return;
+  const colors=['#6c8ef5','#a78bfa','#1e2d4a','#0f1a2e','#ffffff','#18ffff'];
+  for(let i=0;i<108;i++){const px=document.createElement('div');px.className='px';px.style.background=colors[Math.floor(Math.random()*colors.length)];px.style.animationDelay=(Math.random()*4)+'s';px.style.animationDuration=(2+Math.random()*3)+'s';grid.appendChild(px);}
+}
+
+function initHealth(){
+  const bars=[{id:'hb-bat',pct:61,ppct:'hb-bat-pct'},{id:'hb-sto',pct:92,ppct:'hb-sto-pct'},{id:'hb-cpu',pct:96,ppct:'hb-cpu-pct'},{id:'hb-tmp',pct:88,ppct:'hb-tmp-pct'},{id:'hb-dsp',pct:97,ppct:'hb-dsp-pct'}];
+  const overall=Math.round(bars.reduce((a,b)=>a+b.pct,0)/bars.length);
+  setTimeout(()=>{
+    bars.forEach(b=>{
+      document.getElementById(b.id).style.width=b.pct+'%';
+      let c=0;const ti=setInterval(()=>{c=Math.min(c+3,b.pct);document.getElementById(b.ppct).textContent=c+'%';if(c>=b.pct)clearInterval(ti);},20);
+    });
+    let o=0;const oi=setInterval(()=>{o=Math.min(o+2,overall);document.getElementById('health-score-big').textContent=o;if(o>=overall){clearInterval(oi);const g=document.getElementById('health-grade');if(overall>=90){g.textContent='Excellent';g.style.color='var(--ok)';}else if(overall>=75){g.textContent='Good';g.style.color='var(--ok)';}else if(overall>=60){g.textContent='Fair — needs attention';g.style.color='var(--warn)';}else{g.textContent='Poor — act now';g.style.color='var(--danger)';}}},20);
+  },300);
+}
+
+// Particles
+const canvas=document.getElementById('cv');const ctx=canvas.getContext('2d');let pts=[];
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();window.addEventListener('resize',resize);
+for(let i=0;i<45;i++){pts.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+0.2,a:Math.random()*0.28+0.05,c:Math.random()>.5?'108,142,245':'167,139,250'});}
+function anim(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c},${p.a})`;ctx.fill();});
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(108,142,245,${0.035*(1-d/110)})`;ctx.lineWidth=0.5;ctx.stroke();}}
+  requestAnimationFrame(anim);
+}
+anim();
+</script>
+</body>
+</html>
