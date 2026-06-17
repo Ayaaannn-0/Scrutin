@@ -1,4 +1,6 @@
-# Scrutin
+
+# Scrutin🛡️
+
 ### Know what's inside your phone
 
 A consumer tool to detect fake or replaced phone components after repair.
@@ -7,21 +9,19 @@ No trust — only data.
 ---
 
 ## The Problem
-
 Every day millions of people get cheated at repair shops with fake or cheap replacement components. There's no way for a normal person to verify if the parts used are genuine.
 
 ## The Solution
-
 Scrutin scans your phone's hardware via ADB, fetches official specs (Featherless AI with MobileAPI fallback), compares them with AI-assisted validation, and flags anything suspicious — in plain language anyone can understand.
 
 ## Features
 
-- **Full Hardware Scan** — battery, storage, RAM, display, chipset
-- **Component Comparison** — scanned data vs official specs via Featherless AI
-- **Fraud Detection** — flags suspicious or replaced components
-- **Specs Cache** — fetches once, stores locally for speed
-- **App Privacy Audit** — AI review of installed third-party apps
-- **Precautions Guide** — how to stay safe at repair shops
+- 🔍**Full Hardware Scan** — battery, storage, RAM, display, chipset
+- 📊**Component Comparison** — scanned data vs official specs via Featherless AI
+- ⚠️**Fraud Detection** — flags suspicious or replaced components
+- 💾**Specs Cache** — fetches once, stores locally for speed
+- 🔒**App Privacy Audit** — AI review of installed third-party apps
+- 🛡️**Precautions Guide** — how to stay safe at repair shops
 
 ## Tech Stack
 
@@ -65,9 +65,7 @@ python scanner.py
 ```
 
 ## Project Status
-
-Active development — v0.1 prototype
+Active development — v0.2 prototype
 
 ## Built By
-
 Ayaan
