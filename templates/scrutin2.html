@@ -1,0 +1,1993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrutin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c14;--bg2:#0d1120;--bg3:#111828;--bg4:#161d2e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e2eaf8;--textd:rgba(226,234,248,0.4);--textm:rgba(226,234,248,0.65);
+  --accent:#6c8ef5;--accent2:#a78bfa;
+  --grad:linear-gradient(135deg,#6c8ef5,#a78bfa);
+  --warn:#f59e0b;--danger:#ef4444;--ok:#10b981;
+  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.noise{position:fixed;inset:0;z-index:0;opacity:0.022;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.mesh{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.mb{position:absolute;border-radius:50%;filter:blur(100px);}
+.mb1{width:600px;height:600px;background:radial-gradient(circle,rgba(108,142,245,0.09),transparent 70%);top:-200px;right:-150px;animation:mbf 8s ease-in-out infinite;}
+.mb2{width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,0.07),transparent 70%);bottom:-100px;left:-150px;animation:mbf 8s ease-in-out infinite 4s;}
+.mb3{width:280px;height:280px;background:radial-gradient(circle,rgba(108,142,245,0.05),transparent 70%);top:45%;left:35%;animation:mbf 6s ease-in-out infinite 2s;}
+@keyframes mbf{0%,100%{transform:scale(1) translate(0,0);}50%{transform:scale(1.08) translate(18px,-18px);}}
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.app{position:relative;z-index:2;max-width:480px;margin:0 auto;padding:22px 18px;min-height:100vh;display:flex;flex-direction:column;}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:var(--grad);box-shadow:0 4px 16px rgba(108,142,245,0.3);}
+.logo-txt{font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.4px;}
+.logo-txt span{background:var(--grad);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ver{font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:20px;border:1px solid rgba(108,142,245,0.28);color:var(--accent);background:rgba(108,142,245,0.08);}
+.screen{display:none;flex-direction:column;flex:1;}
+.screen.active{display:flex;animation:si .32s cubic-bezier(.16,1,.3,1);}
+@keyframes si{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.dash-greeting{margin-bottom:24px;}
+.dash-greeting h1{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px;margin-bottom:4px;}
+.dash-greeting p{font-size:13px;color:var(--textd);}
+.hero-card{background:var(--bg2);border:1px solid rgba(108,142,245,0.2);border-radius:18px;padding:22px;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer;transition:all .22s;}
+.hero-card:hover{border-color:rgba(108,142,245,0.4);box-shadow:0 8px 32px rgba(108,142,245,0.12);transform:translateY(-1px);}
+.hero-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);opacity:0.4;}
+.hero-card-inner{display:flex;align-items:center;gap:16px;}
+.hero-card-icon{width:52px;height:52px;border-radius:14px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 4px 16px rgba(108,142,245,0.3);}
+.hero-card-text h2{font-size:17px;font-weight:700;color:#fff;margin-bottom:3px;letter-spacing:-0.3px;}
+.hero-card-text p{font-size:13px;color:var(--textm);line-height:1.5;}
+.hero-card-arrow{margin-left:auto;color:var(--accent);opacity:0.6;flex-shrink:0;}
+.hero-card-tag{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(108,142,245,0.12);color:var(--accent);border:1px solid rgba(108,142,245,0.2);margin-top:10px;letter-spacing:0.5px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.grid3 .dash-card{padding:14px 10px;}
+.grid3 .card-icon{width:34px;height:34px;font-size:16px;margin-bottom:10px;}
+.grid3 .card-title{font-size:12px;}
+.grid3 .card-desc{font-size:10px;line-height:1.4;}
+.hero-card-ba{border-color:rgba(167,139,250,0.25);}
+.hero-card-ba:hover{border-color:rgba(167,139,250,0.45);box-shadow:0 8px 32px rgba(167,139,250,0.12);}
+.hero-card-ba .hero-card-icon{background:linear-gradient(135deg,#a78bfa,#c084fc);box-shadow:0 4px 16px rgba(167,139,250,0.3);}
+.hero-card-ba .hero-card-tag{background:rgba(167,139,250,0.12);color:#c084fc;border-color:rgba(167,139,250,0.25);}
+.hist-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.hist-item:hover{border-color:var(--border2);transform:translateY(-1px);}
+.hist-item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.hist-item-name{font-size:14px;font-weight:600;color:#fff;}
+.hist-item-date{font-family:var(--mono);font-size:10px;color:var(--textd);}
+.hist-item-meta{font-size:11px;color:var(--textm);}
+.hist-item-score{font-family:var(--mono);font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(108,142,245,0.1);color:var(--accent);}
+.grid1{margin-bottom:10px;}
+.dash-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;}
+.dash-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+.dash-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;opacity:0;transition:opacity .22s;}
+.dash-card:hover::after{opacity:1;}
+.dc-scan::after{background:var(--grad);}
+.dc-health::after{background:linear-gradient(90deg,#10b981,#34d399);}
+.dc-info::after{background:linear-gradient(90deg,#6c8ef5,#60a5fa);}
+.dc-ba::after{background:linear-gradient(90deg,#a78bfa,#c084fc);}
+.dc-hist::after{background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.dc-prec::after{background:linear-gradient(90deg,#ef4444,#f87171);}
+.card-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px;border:1px solid var(--border);}
+.dc-scan .card-icon{background:rgba(108,142,245,0.1);border-color:rgba(108,142,245,0.2);}
+.dc-health .card-icon{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.2);}
+.dc-info .card-icon{background:rgba(108,142,245,0.1);border-color:rgba(96,165,250,0.2);}
+.dc-ba .card-icon{background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.2);}
+.dc-hist .card-icon{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);}
+.dc-prec .card-icon{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);}
+.card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;letter-spacing:-0.2px;}
+.card-desc{font-size:11px;color:var(--textd);line-height:1.5;}
+.wide-card{display:flex;align-items:center;gap:14px;padding:16px;}
+.wide-card .card-icon{margin-bottom:0;flex-shrink:0;}
+.wide-card-text .card-title{margin-bottom:2px;}
+.btn-p{width:100%;padding:14px 20px;background:var(--grad);border:none;border-radius:12px;font-family:var(--font);font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .22s;margin-bottom:10px;box-shadow:0 4px 20px rgba(108,142,245,0.28);letter-spacing:-0.1px;}
+.btn-p:hover{box-shadow:0 6px 28px rgba(108,142,245,0.42);transform:translateY(-1px);}
+.btn-p:active{transform:scale(0.98);}
+.btn-s{width:100%;padding:13px 20px;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:12px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--textm);cursor:pointer;transition:all .2s;}
+.btn-s:hover{background:rgba(255,255,255,0.07);color:var(--text);}
+.nav-bk{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--textd);cursor:pointer;margin-bottom:22px;width:fit-content;background:none;border:none;font-family:var(--font);transition:color .2s;}
+.nav-bk:hover{color:var(--accent);}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-hdr-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sec-hdr h2{font-size:18px;font-weight:700;color:#fff;letter-spacing:-0.4px;}
+.sec-hdr p{font-size:12px;color:var(--textd);margin-top:1px;}
+.cc{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);opacity:0.3;}
+.sr{display:flex;align-items:flex-start;gap:14px;padding:12px 0;}
+.sr:not(:last-child){border-bottom:1px solid var(--border);}
+.sn{width:27px;height:27px;border-radius:8px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.22);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);}
+.st{font-size:14px;color:var(--textm);line-height:1.55;padding-top:3px;}
+.st strong{color:var(--text);font-weight:600;}
+.stbar{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:10px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.18);margin-bottom:16px;transition:all .5s;}
+.stbar.conn{background:rgba(16,185,129,0.07);border-color:rgba(16,185,129,0.25);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--warn);flex-shrink:0;animation:dp 1.2s ease-in-out infinite;}
+.stbar.conn .sdot{background:var(--ok);animation:none;}
+@keyframes dp{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.3;transform:scale(.75);}}
+.stxt{font-size:13px;font-weight:500;color:var(--textd);}
+.stbar.conn .stxt{color:var(--ok);}
+.scp{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.sc-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;letter-spacing:-0.5px;}
+.sc-sub{font-size:13px;color:var(--textd);margin-bottom:26px;}
+.sci{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);opacity:.2;transition:opacity .5s,transform .3s;}
+.sci.active{opacity:1;transform:translateX(3px);}
+.sci.done{opacity:.6;}
+.sci-ic{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;background:var(--bg3);border:1px solid var(--border);transition:all .4s;}
+.sci.active .sci-ic{background:rgba(108,142,245,0.12);border-color:rgba(108,142,245,0.3);box-shadow:0 0 12px rgba(108,142,245,0.15);}
+.sci.done .sci-ic{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);}
+.sci-lbl{font-size:14px;font-weight:500;color:var(--textm);flex:1;}
+.sci-st{font-size:11px;font-family:var(--mono);color:var(--textd);}
+.sci.active .sci-st{color:var(--accent);}
+.sci.done .sci-st{color:var(--ok);}
+.pw2{margin-top:22px;background:var(--bg3);border-radius:99px;height:3px;overflow:hidden;}
+.pf{height:100%;background:var(--grad);border-radius:99px;transition:width .7s cubic-bezier(.4,0,.2,1);width:0%;}
+.plbl{font-family:var(--mono);font-size:10px;color:var(--textd);text-align:right;margin-top:5px;}
+.rh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.di h2{font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;letter-spacing:-0.4px;}
+.di p{font-size:12px;color:var(--textd);font-family:var(--mono);}
+.ts{text-align:right;}
+.tsn{font-size:34px;font-weight:800;background:linear-gradient(135deg,var(--warn),#f97316);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;letter-spacing:-1.5px;}
+.tsl{font-size:10px;color:var(--textd);letter-spacing:0.5px;text-transform:uppercase;margin-top:2px;font-family:var(--mono);}
+.ob{padding:12px 16px 12px 20px;border-radius:10px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.16);font-size:13px;font-weight:500;color:rgba(245,158,11,0.9);margin-bottom:14px;line-height:1.6;position:relative;}
+.ob::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--warn);border-radius:3px 0 0 3px;}
+.card2{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.card2:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+.card2::after{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;opacity:0;transition:opacity .2s;}
+.card2:hover::after{opacity:1;}
+.ok2::after{background:var(--ok);}
+.wn2::after{background:var(--warn);}
+.bd2::after{background:var(--danger);}
+.ch{display:flex;align-items:center;gap:12px;}
+.ci2{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.ok2 .ci2{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);}
+.wn2 .ci2{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);}
+.bd2 .ci2{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);}
+.cn{font-size:14px;font-weight:600;color:var(--text);}
+.cr{font-size:12px;color:var(--textd);margin-top:2px;}
+.sp2{font-family:var(--mono);font-size:9px;font-weight:600;padding:4px 9px;border-radius:20px;letter-spacing:0.5px;white-space:nowrap;}
+.ok2 .sp2{background:rgba(16,185,129,0.1);color:var(--ok);border:1px solid rgba(16,185,129,0.18);}
+.wn2 .sp2{background:rgba(245,158,11,0.1);color:var(--warn);border:1px solid rgba(245,158,11,0.18);}
+.bd2 .sp2{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.18);}
+
+/* Audit UI */
+.audit-box{white-space:pre-line;background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;color:var(--textm);line-height:1.7;}
+.btn-audit{padding:5px 12px;background:var(--grad);border:none;border-radius:6px;font-family:var(--font);font-size:11px;font-weight:600;color:#fff;cursor:pointer;transition:all .2s;}
+.btn-audit:hover{opacity:0.9;transform:translateY(-0.5px);}
+
+.ar{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;padding-bottom:20px;}
+.ab{padding:12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.02);color:var(--textm);font-size:13px;font-weight:500;cursor:pointer;text-align:center;transition:all .2s;font-family:var(--font);}
+.ab:hover{background:rgba(255,255,255,0.06);color:var(--text);}
+.ab.sh{background:rgba(108,142,245,0.08);color:var(--accent);border-color:rgba(108,142,245,0.2);}
+.ab.sh:hover{background:rgba(108,142,245,0.15);}
+.disc{font-size:11px;color:rgba(226,234,248,0.18);text-align:center;line-height:1.7;padding-bottom:20px;}
+.rs,.ds,.bas,.hs,.infos,.precs{overflow-y:auto;}
+.dh{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.dbi{width:54px;height:54px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
+.dtitle{font-size:20px;font-weight:700;color:#fff;letter-spacing:-0.5px;}
+.dstatus{font-size:12px;margin-top:3px;font-weight:500;}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.sc2{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:13px;}
+.slbl{font-size:10px;color:var(--textd);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.7px;font-family:var(--mono);}
+.sv{font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.3px;}
+.sv.w{color:var(--warn);}
+.sv.ok{color:var(--ok);}
+.sv.bd{color:var(--danger);}
+.ib{border-radius:11px;padding:15px;margin-bottom:10px;font-size:14px;line-height:1.7;color:var(--textm);}
+.ib.wb{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);}
+.ib.rdb{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.1);}
+.ib.okb{background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.1);}
+.ib.ab2{background:var(--bg2);border:1px solid var(--border);margin-bottom:14px;}
+.ib strong{color:var(--text);font-weight:600;}
+.action-card{border-radius:12px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;}
+.action-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px;}
+.act-minor{background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.12);}
+.act-minor::before{background:var(--ok);}
+.act-mod{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.12);}
+.act-mod::before{background:var(--warn);}
+.act-serious{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.14);}
+.act-serious::before{background:var(--danger);}
+.act-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;}
+.act-minor .act-label{color:var(--ok);}
+.act-mod .act-label{color:var(--warn);}
+.act-serious .act-label{color:var(--danger);}
+.act-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.act-body{font-size:13px;color:var(--textm);line-height:1.7;}
+.act-body strong{color:var(--text);font-weight:600;}
+.service-link{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 14px;background:rgba(108,142,245,0.08);border:1px solid rgba(108,142,245,0.18);border-radius:9px;text-decoration:none;transition:all .2s;cursor:pointer;}
+.service-link:hover{background:rgba(108,142,245,0.14);}
+.service-link-icon{font-size:18px;flex-shrink:0;}
+.service-link-text{flex:1;}
+.service-link-name{font-size:13px;font-weight:600;color:var(--accent);}
+.service-link-url{font-size:11px;color:var(--textd);font-family:var(--mono);margin-top:1px;}
+.dg{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.dg::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:var(--grad);opacity:0.22;}
+.dg-lbl{font-family:var(--mono);font-size:10px;color:var(--textd);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:16px;}
+.bv{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.batt{width:200px;height:90px;border:2px solid rgba(108,142,245,0.35);border-radius:12px;position:relative;background:rgba(8,12,20,0.8);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);}
+.batt-tip{width:10px;height:30px;background:rgba(108,142,245,0.35);border-radius:0 5px 5px 0;position:absolute;right:-12px;top:50%;transform:translateY(-50%);}
+.batt-fill{position:absolute;left:5px;top:5px;bottom:5px;border-radius:7px;transition:width 1.6s cubic-bezier(.4,0,.2,1);}
+.batt-pct{font-size:22px;font-weight:700;color:#fff;position:relative;z-index:2;font-family:var(--mono);text-shadow:0 2px 8px rgba(0,0,0,0.8);}
+.health-row{display:flex;align-items:center;gap:16px;width:100%;}
+.rw{position:relative;width:88px;height:88px;flex-shrink:0;}
+.rw svg{transform:rotate(-90deg);}
+.rbg{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:8;}
+.rfg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1.6s cubic-bezier(.4,0,.2,1);}
+.rt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.rp{font-family:var(--mono);font-size:16px;font-weight:700;color:#fff;line-height:1;}
+.rl{font-size:9px;color:var(--textd);margin-top:2px;}
+.ri{flex:1;}
+.ri-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.ri-row:last-child{border:none;}
+.rk{color:var(--textd);}
+.rv{font-family:var(--mono);font-weight:600;}
+.rv.w{color:var(--warn);}
+.rv.ok{color:var(--ok);}
+.bstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;}
+.bst{text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:10px 6px;}
+.bsv{font-family:var(--mono);font-size:13px;font-weight:600;color:#fff;}
+.bsv.w{color:var(--warn);}
+.bsv.ok{color:var(--ok);}
+.bsl{font-size:10px;color:var(--textd);margin-top:3px;}
+.chip-scene{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.chip{width:190px;height:130px;background:var(--bg3);border:1.5px solid rgba(108,142,245,0.18);border-radius:10px;position:relative;display:flex;align-items:center;justify-content:center;}
+.chip-inner{width:88px;height:66px;border:1px solid rgba(108,142,245,0.3);border-radius:5px;background:rgba(108,142,245,0.04);display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:5px;}
+.chip-cell{border-radius:3px;animation:cblink 3s ease-in-out infinite;}
+.chip-cell:nth-child(2){animation-delay:.4s;}
+.chip-cell:nth-child(3){animation-delay:.8s;}
+.chip-cell:nth-child(4){animation-delay:1.2s;}
+@keyframes cblink{0%,100%{opacity:.2;}50%{opacity:.75;}}
+.chip-pins{position:absolute;display:flex;justify-content:space-around;}
+.chip-pins.top{top:-5px;left:22px;right:22px;}
+.chip-pins.bot{bottom:-5px;left:22px;right:22px;}
+.cp{width:6px;height:5px;border-radius:1px;background:rgba(108,142,245,0.4);}
+.chip-badge{position:absolute;top:7px;right:7px;font-family:var(--mono);font-size:8px;font-weight:600;padding:2px 6px;border-radius:4px;}
+.speed-bars{width:100%;display:flex;flex-direction:column;gap:12px;}
+.spb{display:flex;flex-direction:column;gap:5px;}
+.spb-hdr{display:flex;justify-content:space-between;align-items:center;}
+.spb-lbl{font-size:12px;font-weight:500;color:var(--textm);}
+.spb-vals{font-family:var(--mono);font-size:11px;}
+.spb-track{height:7px;background:var(--bg3);border-radius:99px;overflow:hidden;}
+.spb-fill{height:100%;border-radius:99px;transition:width 1.5s cubic-bezier(.4,0,.2,1);width:0%;}
+.cpu-scene{display:flex;flex-direction:column;align-items:center;gap:18px;}
+.cpu-die{width:180px;height:180px;background:var(--bg3);border:1.5px solid rgba(108,142,245,0.18);border-radius:8px;padding:10px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:5px;}
+.cpu-block{border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:500;}
+.cpu-core{background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);color:rgba(108,142,245,0.8);animation:cpulse 2.5s ease-in-out infinite;}
+.cpu-core:nth-child(2){animation-delay:.3s;}.cpu-core:nth-child(3){animation-delay:.6s;}.cpu-core:nth-child(4){animation-delay:.9s;}.cpu-core:nth-child(5){animation-delay:1.2s;}.cpu-core:nth-child(6){animation-delay:1.5s;}.cpu-core:nth-child(7){animation-delay:1.8s;}.cpu-core:nth-child(8){animation-delay:2.1s;}
+@keyframes cpulse{0%,100%{background:rgba(108,142,245,0.1);}50%{background:rgba(108,142,245,0.22);box-shadow:0 0 8px rgba(108,142,245,0.2);}}
+.cpu-center{background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.22);color:rgba(167,139,250,0.7);font-size:7px;}
+.cpu-stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.disp-scene{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.disp-frame{width:168px;height:126px;border:2px solid rgba(108,142,245,0.3);border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;}
+.disp-inner{width:152px;height:110px;border-radius:9px;background:var(--bg2);overflow:hidden;position:relative;}
+.px-grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:repeat(9,1fr);gap:1px;padding:2px;opacity:.5;}
+.px{border-radius:1px;animation:pxf 4s ease-in-out infinite;}
+@keyframes pxf{0%,100%{opacity:.1;}50%{opacity:.9;}}
+.disp-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(108,142,245,0.08),rgba(167,139,250,0.05));display:flex;align-items:center;justify-content:center;}
+.disp-label{text-align:center;}
+.disp-res{font-family:var(--mono);font-size:14px;font-weight:600;color:#fff;}
+.disp-hz{font-family:var(--mono);font-size:11px;color:var(--accent);margin-top:2px;}
+.rbar-wrap{width:100%;height:5px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-top:6px;}
+.rbar{height:100%;background:var(--grad);border-radius:99px;animation:rb 1.11s linear infinite;}
+@keyframes rb{0%{transform:translateX(-100%);}100%{transform:translateX(500%);}}
+.disp-stats{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.health-overview{background:var(--bg2);border:1px solid rgba(16,185,129,0.18);border-radius:16px;padding:20px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden;}
+.health-overview::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--ok),transparent);opacity:0.4;}
+.health-score-big{font-size:56px;font-weight:800;background:linear-gradient(135deg,var(--ok),#34d399);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-2px;line-height:1;}
+.health-score-label{font-size:13px;color:var(--textd);margin-top:4px;}
+.health-grade{display:inline-block;font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;background:rgba(16,185,129,0.12);color:var(--ok);border:1px solid rgba(16,185,129,0.22);margin-top:10px;letter-spacing:0.5px;}
+.health-bar-grid{display:flex;flex-direction:column;gap:12px;margin-bottom:14px;}
+.hb{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:14px;}
+.hb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.hb-left{display:flex;align-items:center;gap:8px;}
+.hb-icon{font-size:16px;}
+.hb-name{font-size:13px;font-weight:600;color:var(--text);}
+.hb-pct{font-family:var(--mono);font-size:13px;font-weight:600;}
+.hb-track{height:6px;background:var(--bg3);border-radius:99px;overflow:hidden;}
+.hb-fill{height:100%;border-radius:99px;transition:width 1.4s cubic-bezier(.4,0,.2,1);width:0%;}
+.hb-sub{font-size:11px;color:var(--textd);margin-top:6px;}
+.info-section{margin-bottom:16px;}
+.info-sec-title{font-size:12px;font-weight:600;color:var(--textd);text-transform:uppercase;letter-spacing:0.8px;font-family:var(--mono);margin-bottom:10px;padding-left:2px;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:13px;}
+.info-label{font-size:10px;color:var(--textd);text-transform:uppercase;letter-spacing:0.7px;font-family:var(--mono);margin-bottom:5px;}
+.info-value{font-size:14px;font-weight:600;color:var(--text);letter-spacing:-0.2px;}
+.info-value.small{font-size:12px;}
+.info-full{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:8px;}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.info-row:last-child{border:none;}
+.info-row-key{color:var(--textd);}
+.info-row-val{font-family:var(--mono);font-weight:500;color:var(--text);font-size:12px;}
+.bat{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.brow{display:grid;grid-template-columns:1.2fr 1fr 1fr;}
+.bhr{background:rgba(108,142,245,0.04);border-bottom:1px solid var(--border);}
+.bc{padding:12px 14px;font-size:13px;font-weight:500;}
+.brow:not(.bhr):not(:last-child) .bc{border-bottom:1px solid var(--border);}
+.bc:not(:first-child){border-left:1px solid var(--border);}
+.bhr .bc{font-family:var(--mono);font-size:9px;color:var(--textd);letter-spacing:0.7px;text-transform:uppercase;font-weight:400;}
+.bok{color:var(--ok);}.bwn{color:var(--warn);}.bbd{color:var(--danger);}.blbl{color:var(--textm);}
+.cb{padding:13px 16px 13px 20px;border-radius:10px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);font-size:13px;font-weight:500;color:rgba(239,68,68,0.9);margin-bottom:16px;line-height:1.6;position:relative;}
+.cb::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--danger);border-radius:3px 0 0 3px;}
+.hist-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;}
+.hist-item:hover{border-color:var(--border2);transform:translateY(-1px);}
+.hist-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.hist-device{font-size:14px;font-weight:600;color:var(--text);}
+.hist-score{font-family:var(--mono);font-size:13px;font-weight:700;}
+.hist-date{font-size:11px;color:var(--textd);font-family:var(--mono);}
+.hist-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.hist-tag{font-size:10px;padding:3px 8px;border-radius:20px;font-family:var(--mono);font-weight:500;}
+.hist-tag.ok{background:rgba(16,185,129,0.1);color:var(--ok);border:1px solid rgba(16,185,129,0.18);}
+.hist-tag.warn{background:rgba(245,158,11,0.1);color:var(--warn);border:1px solid rgba(245,158,11,0.18);}
+.hist-tag.bad{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.18);}
+.prec-tab{display:flex;gap:8px;margin-bottom:18px;}
+.ptab{flex:1;padding:10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.02);font-size:13px;font-weight:500;color:var(--textd);cursor:pointer;text-align:center;transition:all .2s;font-family:var(--font);}
+.ptab.active{background:rgba(108,142,245,0.1);border-color:rgba(108,142,245,0.25);color:var(--accent);}
+.prec-list{display:none;}
+.prec-list.active{display:flex;flex-direction:column;gap:10px;}
+.prec-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:15px;display:flex;align-items:flex-start;gap:12px;}
+.prec-num{width:26px;height:26px;border-radius:7px;background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);color:var(--accent);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);}
+.prec-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.prec-desc{font-size:12px;color:var(--textd);line-height:1.6;}
+.prec-item.highlight{border-color:rgba(108,142,245,0.2);background:rgba(108,142,245,0.04);}
+.prec-item.warn-item{border-color:rgba(245,158,11,0.15);background:rgba(245,158,11,0.03);}
+.prec-item.warn-item .prec-num{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);color:var(--warn);}
+
+/* Layout grid for results */
+.results-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 15px;
+}
+.mockup-side {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.012);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.cards-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+/* Phone Mockup (Vector Motherboard SVG Container) */
+.phone-mockup {
+  width: 170px;
+  height: 335px;
+  border: 4px solid #1e293b;
+  border-radius: 28px;
+  position: relative;
+  background: #090d16;
+  box-shadow: 0 0 32px rgba(0,0,0,0.8);
+  user-select: none;
+  overflow: hidden;
+}
+
+/* Background tracks & pins */
+.bg-track {
+  stroke: rgba(255,255,255,0.04);
+  stroke-width: 1.5;
+  fill: none;
+}
+.ram-pin, .cpu-pin, .bat-line, .sns-lens, .sns-lens-inner {
+  stroke: rgba(255,255,255,0.12);
+  stroke-width: 1;
+  fill: none;
+}
+.sto-contact {
+  fill: rgba(255,255,255,0.05);
+}
+.sns-lens {
+  stroke: rgba(255,255,255,0.18);
+  fill: rgba(255,255,255,0.02);
+}
+.sns-lens-inner {
+  fill: rgba(255,255,255,0.25);
+}
+
+.svg-chip rect {
+  fill: rgba(255,255,255,0.02);
+  stroke: rgba(255,255,255,0.12);
+  stroke-width: 1;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.svg-chip:hover rect {
+  stroke: rgba(255,255,255,0.3);
+  fill: rgba(255,255,255,0.04);
+}
+
+.svg-lbl {
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 700;
+  fill: var(--textd);
+  text-anchor: middle;
+  pointer-events: none;
+}
+.svg-lbl-sm {
+  font-family: var(--mono);
+  font-size: 7px;
+  font-weight: 700;
+  fill: var(--textd);
+  text-anchor: middle;
+  pointer-events: none;
+}
+
+/* Glowing Chip SVG Styles */
+@keyframes svgGlowGreen {
+  0%, 100% {
+    stroke: rgba(16,185,129,0.45);
+    fill: rgba(16,185,129,0.06);
+  }
+  50% {
+    stroke: rgba(16,185,129,1.0);
+    fill: rgba(16,185,129,0.18);
+  }
+}
+@keyframes svgGlowWarn {
+  0%, 100% {
+    stroke: rgba(245,158,11,0.45);
+    fill: rgba(245,158,11,0.06);
+  }
+  50% {
+    stroke: rgba(245,158,11,1.0);
+    fill: rgba(245,158,11,0.18);
+  }
+}
+@keyframes svgGlowDanger {
+  0%, 100% {
+    stroke: rgba(239,68,68,0.45);
+    fill: rgba(239,68,68,0.06);
+  }
+  50% {
+    stroke: rgba(239,68,68,1.0);
+    fill: rgba(239,68,68,0.18);
+  }
+}
+
+.svg-green {
+  animation: svgGlowGreen 2.2s infinite ease-in-out;
+  stroke-width: 1.5px !important;
+}
+.svg-warn {
+  animation: svgGlowWarn 2.2s infinite ease-in-out;
+  stroke-width: 1.5px !important;
+}
+.svg-danger {
+  animation: svgGlowDanger 2.2s infinite ease-in-out;
+  stroke-width: 1.5px !important;
+}
+
+/* Flowing tracks along data paths */
+@keyframes flowCircuit {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+.circuit-line {
+  stroke: rgba(108,142,245,0.06);
+  stroke-width: 1.5;
+  stroke-dasharray: 4, 12;
+  fill: none;
+  animation: flowCircuit 2s linear infinite;
+}
+.circuit-line-green {
+  stroke: rgba(16,185,129,0.35);
+  stroke-width: 1.5;
+  stroke-dasharray: 5, 10;
+  fill: none;
+  animation: flowCircuit 1.5s linear infinite;
+}
+.circuit-line-warn {
+  stroke: rgba(245,158,11,0.35);
+  stroke-width: 1.5;
+  stroke-dasharray: 5, 10;
+  fill: none;
+  animation: flowCircuit 1.5s linear infinite;
+}
+.circuit-line-danger {
+  stroke: rgba(239,68,68,0.35);
+  stroke-width: 1.5;
+  stroke-dasharray: 5, 10;
+  fill: none;
+  animation: flowCircuit 1.5s linear infinite;
+}
+
+/* Mockup Legend styling */
+.mockup-legend {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.lg-item {
+  font-size: 10px;
+  color: var(--textd);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.lg-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.dot-ok {
+  background: var(--ok);
+  box-shadow: 0 0 6px var(--ok);
+}
+.dot-warn {
+  background: var(--warn);
+  box-shadow: 0 0 6px var(--warn);
+}
+.dot-err {
+  background: var(--danger);
+  box-shadow: 0 0 6px var(--danger);
+}
+
+/* Responsive grid for tablet/desktop */
+@media (min-width: 768px) {
+  .results-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .mockup-side {
+    position: sticky;
+    top: 24px;
+    padding: 30px 20px;
+  }
+  .app:has(#results.active) {
+    max-width: 860px !important;
+  }
+}
+
+.app {
+  transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="mesh"><div class="mb mb1"></div><div class="mb mb2"></div><div class="mb mb3"></div></div>
+<canvas id="cv"></canvas>
+
+<div class="app">
+  <div class="hdr">
+    <div class="logo">
+      <div class="logo-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <span class="logo-txt">Scru<span>tin</span></span>
+    </div>
+    <span class="ver">v0.1</span>
+  </div>
+
+  <div class="screen active" id="dashboard">
+    <div class="dash-greeting">
+      <h1>Good evening 👋</h1>
+      <p>What would you like to do today?</p>
+    </div>
+    <div class="hero-card" onclick="go('connect')">
+      <div class="hero-card-inner">
+        <div class="hero-card-icon">🔍</div>
+        <div class="hero-card-text">
+          <h2>Scan My Phone</h2>
+          <p>Detect fake or replaced components after a repair. Full fraud detection.</p>
+        </div>
+        <div class="hero-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <span class="hero-card-tag">MAIN FEATURE</span>
+    </div>
+    <div class="grid3">
+      <div class="dash-card dc-health" onclick="go('health')">
+        <div class="card-icon">❤️</div>
+        <div class="card-title">Health Check</div>
+        <div class="card-desc">Overall health score of your phone's components</div>
+      </div>
+      <div class="dash-card dc-info" onclick="go('phoneinfo')">
+        <div class="card-icon">📱</div>
+        <div class="card-title">Phone Info</div>
+        <div class="card-desc">Full hardware details pulled from your device</div>
+      </div>
+      <div class="dash-card dc-hist" onclick="go('history')">
+        <div class="card-icon">🕘</div>
+        <div class="card-title">History</div>
+        <div class="card-desc">View all your past scans and reports</div>
+      </div>
+    </div>
+    <div class="hero-card hero-card-ba" onclick="go('ba')">
+      <div class="hero-card-inner">
+        <div class="hero-card-icon">🔄</div>
+        <div class="hero-card-text">
+          <h2>Before / After</h2>
+          <p>Compare your phone before and after repair. Save proof nothing was swapped.</p>
+        </div>
+        <div class="hero-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <span class="hero-card-tag">REPAIR CHECK</span>
+    </div>
+    <div class="dash-card dc-prec grid1" onclick="go('precautions')">
+      <div class="wide-card">
+        <div class="card-icon" style="margin-bottom:0">🛡️</div>
+        <div class="wide-card-text">
+          <div class="card-title">Precautions</div>
+          <div class="card-desc">How to keep your phone healthy and stay safe at repair shops</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--textd)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="connect">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);">🔍</div>
+      <div><h2>Scan My Phone</h2><p>Connect your phone to get started</p></div>
+    </div>
+    <div class="cc">
+      <div class="sr"><div class="sn">01</div><div class="st">Plug your phone into your laptop via <strong>USB cable</strong></div></div>
+      <div class="sr"><div class="sn">02</div><div class="st">Go to <strong>Settings → About Phone</strong>, tap Build Number 7 times</div></div>
+      <div class="sr"><div class="sn">03</div><div class="st">Enable <strong>USB Debugging</strong> in Developer Options</div></div>
+      <div class="sr"><div class="sn">04</div><div class="st">Tap <strong>Allow</strong> when prompted on your phone</div></div>
+    </div>
+    <div class="stbar" id="stbar"><div class="sdot"></div><span class="stxt">Waiting for device connection...</span></div>
+    <button class="btn-p" id="btn-start-scan" onclick="startScan()">→ Start Scanning</button>
+    <button class="btn-s" style="margin-top:10px" onclick="go('dashboard')">Cancel</button>
+  </div>
+
+  <div class="screen" id="scanning">
+    <div class="scp">
+      <h2 class="sc-title">Scanning device</h2>
+      <p class="sc-sub">Keep your phone connected — do not unplug</p>
+      <div class="sci" id="si-bat"><div class="sci-ic">🔋</div><span class="sci-lbl">Battery info</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-sto"><div class="sci-ic">💾</div><span class="sci-lbl">Storage details</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-cpu"><div class="sci-ic">⚙️</div><span class="sci-lbl">Processor info</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-dsp"><div class="sci-ic">🖥️</div><span class="sci-lbl">Display specs</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-ai"><div class="sci-ic">🌐</div><span class="sci-lbl">Fetching official specs via AI</span><span class="sci-st">IDLE</span></div>
+      <div class="sci" id="si-cmp"><div class="sci-ic">🔍</div><span class="sci-lbl">Comparing components</span><span class="sci-st">IDLE</span></div>
+      <div class="pw2"><div class="pf" id="pf"></div></div>
+      <div class="plbl" id="plbl">0%</div>
+    </div>
+  </div>
+
+  <div class="screen rs" id="results">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="rh">
+      <div class="di"><h2 id="res-device-name">Scanning...</h2><p id="res-device-sub">—</p></div>
+      <div class="ts"><div class="tsn" id="res-trust-score">—</div><div class="tsl">Trust Score</div></div>
+    </div>
+    <div class="ob" id="res-summary">Analysing results...</div>
+
+    <!-- Results Layout Container (Mockup on left, Cards on right) -->
+    <div class="results-layout">
+      <!-- Left Column: Interactive Phone Motherboard Vector -->
+      <div class="mockup-side">
+        <div class="mockup-sticky" style="display:flex; flex-direction:column; align-items:center;">
+          <div class="phone-mockup">
+            <svg viewBox="0 0 160 330" width="160" height="330" style="display: block;">
+              <!-- Background static bus tracks -->
+              <path d="M 80,53 L 80,124" class="bg-track" />
+              <path d="M 45,107 L 45,116 L 80,116" class="bg-track" />
+              <path d="M 115,107 L 115,116 L 80,116" class="bg-track" />
+              <path d="M 80,196 L 80,215" class="bg-track" />
+              <path d="M 80,275 L 80,290" class="bg-track" />
+              
+              <!-- Flowing overlay tracks (animated pulses along tracks) -->
+              <path id="flow-dsp" d="M 80,53 L 80,124" class="circuit-line" />
+              <path id="flow-ram" d="M 45,107 L 45,116 L 80,116" class="circuit-line" />
+              <path id="flow-sto" d="M 115,107 L 115,116 L 80,116" class="circuit-line" />
+              <path id="flow-bat" d="M 80,196 L 80,215" class="circuit-line" />
+              <path id="flow-sns" d="M 80,275 L 80,290" class="circuit-line" />
+
+              <!-- Interactive Component Blocks -->
+              
+              <!-- SCREEN -->
+              <g id="mock-dsp" class="svg-chip" onclick="go('det-dsp')">
+                <rect x="15" y="25" width="130" height="28" rx="5" />
+                <text x="80" y="42" class="svg-lbl">🖥️ SCREEN</text>
+              </g>
+
+              <!-- RAM stick -->
+              <g id="mock-ram" class="svg-chip" onclick="go('det-ram')">
+                <rect x="15" y="65" width="60" height="42" rx="4" />
+                <!-- Pin lines to look like a RAM stick -->
+                <line x1="20" y1="102" x2="20" y2="105" class="ram-pin" />
+                <line x1="26" y1="102" x2="26" y2="105" class="ram-pin" />
+                <line x1="32" y1="102" x2="32" y2="105" class="ram-pin" />
+                <line x1="38" y1="102" x2="38" y2="105" class="ram-pin" />
+                <line x1="44" y1="102" x2="44" y2="105" class="ram-pin" />
+                <line x1="50" y1="102" x2="50" y2="105" class="ram-pin" />
+                <line x1="56" y1="102" x2="56" y2="105" class="ram-pin" />
+                <line x1="62" y1="102" x2="62" y2="105" class="ram-pin" />
+                <text x="45" y="89" class="svg-lbl-sm">📊 RAM</text>
+              </g>
+
+              <!-- STORAGE flash storage -->
+              <g id="mock-sto" class="svg-chip" onclick="go('det-sto')">
+                <rect x="85" y="65" width="60" height="42" rx="4" />
+                <!-- Contacts grid -->
+                <circle cx="95" cy="73" r="1.5" class="sto-contact" />
+                <circle cx="105" cy="73" r="1.5" class="sto-contact" />
+                <circle cx="115" cy="73" r="1.5" class="sto-contact" />
+                <circle cx="125" cy="73" r="1.5" class="sto-contact" />
+                <circle cx="135" cy="73" r="1.5" class="sto-contact" />
+                <text x="115" y="91" class="svg-lbl-sm">💾 STORAGE</text>
+              </g>
+
+              <!-- PROCESSOR SoC -->
+              <g id="mock-cpu" class="svg-chip" onclick="go('det-cpu')">
+                <!-- Pins -->
+                <!-- Top pins -->
+                <line x1="45" y1="124" x2="45" y2="120" class="cpu-pin" />
+                <line x1="55" y1="124" x2="55" y2="120" class="cpu-pin" />
+                <line x1="65" y1="124" x2="65" y2="120" class="cpu-pin" />
+                <line x1="75" y1="124" x2="75" y2="120" class="cpu-pin" />
+                <line x1="85" y1="124" x2="85" y2="120" class="cpu-pin" />
+                <line x1="95" y1="124" x2="95" y2="120" class="cpu-pin" />
+                <line x1="105" y1="124" x2="105" y2="120" class="cpu-pin" />
+                <line x1="115" y1="124" x2="115" y2="120" class="cpu-pin" />
+                
+                <!-- Bottom pins -->
+                <line x1="45" y1="196" x2="45" y2="200" class="cpu-pin" />
+                <line x1="55" y1="196" x2="55" y2="200" class="cpu-pin" />
+                <line x1="65" y1="196" x2="65" y2="200" class="cpu-pin" />
+                <line x1="75" y1="196" x2="75" y2="200" class="cpu-pin" />
+                <line x1="85" y1="196" x2="85" y2="200" class="cpu-pin" />
+                <line x1="95" y1="196" x2="95" y2="200" class="cpu-pin" />
+                <line x1="105" y1="196" x2="105" y2="200" class="cpu-pin" />
+                <line x1="115" y1="196" x2="115" y2="200" class="cpu-pin" />
+
+                <!-- Left pins -->
+                <line x1="34" y1="135" x2="30" y2="135" class="cpu-pin" />
+                <line x1="34" y1="145" x2="30" y2="145" class="cpu-pin" />
+                <line x1="34" y1="155" x2="30" y2="155" class="cpu-pin" />
+                <line x1="34" y1="165" x2="30" y2="165" class="cpu-pin" />
+                <line x1="34" y1="175" x2="30" y2="175" class="cpu-pin" />
+                <line x1="34" y1="185" x2="30" y2="185" class="cpu-pin" />
+                
+                <!-- Right pins -->
+                <line x1="126" y1="135" x2="130" y2="135" class="cpu-pin" />
+                <line x1="126" y1="145" x2="130" y2="145" class="cpu-pin" />
+                <line x1="126" y1="155" x2="130" y2="155" class="cpu-pin" />
+                <line x1="126" y1="165" x2="130" y2="165" class="cpu-pin" />
+                <line x1="126" y1="175" x2="130" y2="175" class="cpu-pin" />
+                <line x1="126" y1="185" x2="130" y2="185" class="cpu-pin" />
+
+                <rect x="34" y="124" width="92" height="72" rx="6" />
+                <text x="80" y="164" class="svg-lbl">⚙️ PROCESSOR</text>
+              </g>
+
+              <!-- BATTERY -->
+              <g id="mock-bat" class="svg-chip" onclick="go('det-bat')">
+                <rect x="20" y="215" width="120" height="60" rx="5" />
+                <line x1="28" y1="235" x2="132" y2="235" class="bat-line" />
+                <line x1="28" y1="245" x2="132" y2="245" class="bat-line" />
+                <line x1="28" y1="255" x2="132" y2="255" class="bat-line" />
+                <text x="80" y="250" class="svg-lbl">🔋 BATTERY</text>
+              </g>
+
+              <!-- SENSORS -->
+              <g id="mock-sns" class="svg-chip" onclick="go('det-sns')">
+                <rect x="15" y="290" width="130" height="28" rx="4" />
+                <!-- circular contact lenses -->
+                <circle cx="30" cy="304" r="4.5" class="sns-lens" />
+                <circle cx="30" cy="304" r="1.5" class="sns-lens-inner" />
+                <circle cx="130" cy="304" r="4.5" class="sns-lens" />
+                <circle cx="130" cy="304" r="1.5" class="sns-lens-inner" />
+                <text x="80" y="307" class="svg-lbl">🧭 SENSORS</text>
+              </g>
+            </svg>
+          </div>
+          
+          <!-- Mockup status legend -->
+          <div class="mockup-legend">
+            <span class="lg-item"><span class="lg-dot dot-ok"></span> Genuine</span>
+            <span class="lg-item"><span class="lg-dot dot-warn"></span> Unverified</span>
+            <span class="lg-item"><span class="lg-dot dot-err"></span> Mismatch</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Diagnostic Information Cards -->
+      <div class="cards-side">
+        <div class="card2 ok2" id="bat-card" onclick="go('det-bat')">
+          <div class="ch"><div class="ci2">🔋</div><div style="flex:1"><div class="cn">Battery</div><div class="cr" id="bat-cr">Checking...</div></div><span class="sp2" id="bat-pill">—</span></div>
+        </div>
+        <div class="card2 ok2" id="sto-card" onclick="go('det-sto')">
+          <div class="ch"><div class="ci2">💾</div><div style="flex:1"><div class="cn">Storage</div><div class="cr" id="sto-cr">Checking...</div></div><span class="sp2" id="sto-pill">—</span></div>
+        </div>
+        <div class="card2 ok2" id="ram-card" onclick="go('det-ram')">
+          <div class="ch"><div class="ci2">📊</div><div style="flex:1"><div class="cn">RAM Allocation</div><div class="cr" id="ram-cr">Checking...</div></div><span class="sp2" id="ram-pill">—</span></div>
+        </div>
+        <div class="card2 ok2" id="cpu-card" onclick="go('det-cpu')">
+          <div class="ch"><div class="ci2">⚙️</div><div style="flex:1"><div class="cn">Processor</div><div class="cr" id="cpu-cr">Checking...</div></div><span class="sp2" id="cpu-pill">—</span></div>
+        </div>
+        <div class="card2 ok2" id="dsp-card" onclick="go('det-dsp')">
+          <div class="ch"><div class="ci2">🖥️</div><div style="flex:1"><div class="cn">Display</div><div class="cr" id="dsp-cr">Checking...</div></div><span class="sp2" id="dsp-pill">—</span></div>
+        </div>
+        <div class="card2 ok2" id="sns-card" onclick="go('det-sns')">
+          <div class="ch"><div class="ci2">🧭</div><div style="flex:1"><div class="cn">Sensors Audit</div><div class="cr" id="sns-cr">Checking...</div></div><span class="sp2" id="sns-pill">AUDIT</span></div>
+        </div>
+
+        <div class="card2 wn2" style="cursor: default; padding: 16px; border-color: rgba(167,139,250,0.15);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <span style="font-size:13px; font-weight:700; color:#fff; display:flex; align-items:center; gap:6px;">🛡️ Privacy & Malware Audit</span>
+            <button class="btn-audit" onclick="runAppAudit()">Run Engine Scan</button>
+          </div>
+          <div id="audit-loading" style="font-size:11px; color:var(--textd); display:none; margin-bottom:6px;">
+            ⌛ Interrogating installed system applications packages via Featherless...
+          </div>
+          <div id="audit-results" class="audit-box" style="display:block;">
+            Click engine trigger above to evaluate application permissions architecture for risk profiling.
+          </div>
+        </div>
+
+        <div class="ar">
+          <button class="ab sh" onclick="exportReportPDF()">📄 Save PDF</button>
+          <button class="ab" onclick="go('ba')">🔄 Before/After</button>
+        </div>
+        <p class="disc">Scrutin provides signals, not guarantees. Results indicate possibilities based on reported hardware data.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen ds" id="det-bat">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" id="bat-dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">🔋</div>
+      <div><div class="dtitle">Battery</div><div class="dstatus" id="bat-dstatus" style="color:var(--ok);">Checking...</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="bv">
+        <div style="position:relative;"><div class="batt"><div class="batt-fill" id="batt-fill" style="width:0%"></div><div class="batt-tip"></div><span class="batt-pct" id="batt-pct">0%</span></div></div>
+        <div class="health-row">
+          <div class="rw">
+            <svg width="88" height="88" viewBox="0 0 88 88"><circle class="rbg" cx="44" cy="44" r="34"/><circle class="rfg" id="rfg" cx="44" cy="44" r="34" stroke="var(--ok)" stroke-dasharray="214" stroke-dashoffset="214"/></svg>
+            <div class="rt"><span class="rp" id="rpct">0%</span><span class="rl">Level</span></div>
+          </div>
+          <div class="ri">
+            <div class="ri-row"><span class="rk">Level</span><span class="rv ok" id="ri-level">—</span></div>
+            <div class="ri-row"><span class="rk">Health</span><span class="rv ok" id="ri-health">—</span></div>
+            <div class="ri-row"><span class="rk">Temperature</span><span class="rv ok" id="ri-temp">—</span></div>
+            <div class="ri-row"><span class="rk">Voltage</span><span class="rv ok" id="ri-volt">—</span></div>
+          </div>
+        </div>
+        <div class="bstats">
+          <div class="bst"><div class="bsv ok" id="bst-level">—</div><div class="bsl">Current %</div></div>
+          <div class="bst"><div class="bsv ok" id="bst-health">—</div><div class="bsl">Health</div></div>
+          <div class="bst"><div class="bsv ok" id="bst-tech">—</div><div class="bsl">Type</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sg">
+      <div class="sc2"><div class="slbl">Level</div><div class="sv ok" id="bat-sg-level">—</div></div>
+      <div class="sc2"><div class="slbl">Health</div><div class="sv ok" id="bat-sg-health">—</div></div>
+      <div class="sc2"><div class="slbl">Temperature</div><div class="sv ok" id="bat-sg-temp">—</div></div>
+      <div class="sc2"><div class="slbl">Voltage</div><div class="sv ok" id="bat-sg-volt">—</div></div>
+    </div>
+    <div class="ib okb" id="bat-explanation">Loading battery analysis...</div>
+    <div class="action-card act-minor" id="bat-action">
+      <div class="act-label" id="bat-act-label">✓ No Action Needed</div>
+      <div class="act-title" id="bat-act-title">Battery looks healthy</div>
+      <div class="act-body" id="bat-act-body">Your battery is reporting normal values. No action required.</div>
+      <div class="service-link" id="bat-service" style="display:none">
+        <div class="service-link-icon">🏢</div>
+        <div class="service-link-text">
+          <div class="service-link-name" id="bat-service-name">Authorized Service Center</div>
+          <div class="service-link-url" id="bat-service-url">—</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <div class="screen ds" id="det-sto">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" id="sto-dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">💾</div>
+      <div><div class="dtitle">Storage</div><div class="dstatus" id="sto-dstatus" style="color:var(--ok);">Checking...</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="chip-scene">
+        <div class="chip">
+          <div class="chip-pins top"><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div></div>
+          <div class="chip-inner"><div class="chip-cell" style="background:rgba(108,142,245,0.3)"></div><div class="chip-cell" style="background:rgba(108,142,245,0.3)"></div><div class="chip-cell" style="background:rgba(108,142,245,0.3)"></div><div class="chip-cell" style="background:rgba(108,142,245,0.3)"></div></div>
+          <div class="chip-pins bot"><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div><div class="cp"></div></div>
+        </div>
+        <div class="speed-bars">
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">Total Storage</span><span class="spb-vals" id="sto-total-lbl">—</span></div><div class="spb-track"><div class="spb-fill" id="sp-total" style="background:linear-gradient(90deg,var(--accent),var(--accent2))"></div></div></div>
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">Used</span><span class="spb-vals" id="sto-used-lbl">—</span></div><div class="spb-track"><div class="spb-fill" id="sp-used" style="background:linear-gradient(90deg,var(--warn),rgba(245,158,11,0.5))"></div></div></div>
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">Free</span><span class="spb-vals" id="sto-free-lbl">—</span></div><div class="spb-track"><div class="spb-fill" id="sp-free" style="background:linear-gradient(90deg,var(--ok),rgba(16,185,129,0.5))"></div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sg">
+      <div class="sc2"><div class="slbl">Total</div><div class="sv ok" id="sto-sg-total">—</div></div>
+      <div class="sc2"><div class="slbl">Used</div><div class="sv w" id="sto-sg-used">—</div></div>
+      <div class="sc2"><div class="slbl">Free</div><div class="sv ok" id="sto-sg-free">—</div></div>
+      <div class="sc2"><div class="slbl">Usage</div><div class="sv w" id="sto-sg-usage">—</div></div>
+    </div>
+    <div class="ib okb" id="sto-explanation">Loading storage analysis...</div>
+    <div class="action-card act-minor" id="sto-action">
+      <div class="act-label" id="sto-act-label">✓ No Action Needed</div>
+      <div class="act-title" id="sto-act-title">Storage looks normal</div>
+      <div class="act-body" id="sto-act-body">Your storage is reporting normal values.</div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <div class="screen ds" id="det-ram">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);">📊</div>
+      <div><div class="dtitle">RAM Allocation</div><div class="dstatus" id="ram-dstatus" style="color:var(--ok);">✓ Info verified</div></div>
+    </div>
+    
+    <div class="dg">
+      <div class="dg-lbl">Hardware Analysis</div>
+      <div class="chip-scene">
+        <div style="width: 220px; height: 60px; background: var(--bg3); border: 1.5px solid rgba(108,142,245,0.3); border-radius: 4px; position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+          <div style="position: absolute; bottom: 0; left: 10px; right: 10px; height: 5px; display: flex; gap: 3px;">
+             <div style="width: 45%; height: 100%; background: repeating-linear-gradient(90deg, #fbbf24, #fbbf24 3px, transparent 3px, transparent 5px);"></div>
+             <div style="width: 4px; height: 5px; background: var(--bg2);"></div>
+             <div style="width: 55%; height: 100%; background: repeating-linear-gradient(90deg, #fbbf24, #fbbf24 3px, transparent 3px, transparent 5px);"></div>
+          </div>
+          <div style="width: 26px; height: 34px; background: var(--bg4); border: 1px solid rgba(108,142,245,0.4); border-radius: 3px; animation: cblink 2s infinite;"></div>
+          <div style="width: 26px; height: 34px; background: var(--bg4); border: 1px solid rgba(108,142,245,0.4); border-radius: 3px; animation: cblink 2s infinite .3s;"></div>
+          <div style="padding: 2px 5px; background: rgba(226,234,248,0.9); border-radius: 2px; font-family: var(--mono); font-size: 9px; font-weight: 800; color: #000;">LPDDR</div>
+          <div style="width: 26px; height: 34px; background: var(--bg4); border: 1px solid rgba(108,142,245,0.4); border-radius: 3px; animation: cblink 2s infinite .6s;"></div>
+          <div style="width: 26px; height: 34px; background: var(--bg4); border: 1px solid rgba(108,142,245,0.4); border-radius: 3px; animation: cblink 2s infinite .9s;"></div>
+        </div>
+
+        <div class="speed-bars">
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">Total Memory</span><span class="spb-vals" id="ram-tot-lbl">—</span></div><div class="spb-track"><div class="spb-fill" id="ram-fill-tot" style="background:linear-gradient(90deg,var(--accent),var(--accent2)); width:100%;"></div></div></div>
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">In Use</span><span class="spb-vals" id="ram-use-lbl">—</span></div><div class="spb-track"><div class="spb-fill" id="ram-fill-use" style="background:linear-gradient(90deg,var(--warn),rgba(245,158,11,0.5)); width:0%;"></div></div></div>
+          <div class="spb"><div class="spb-hdr"><span class="spb-lbl">Available</span><span class="spb-vals" id="ram-free-lbl">—</span></div><div class="spb-track"><div class="spb-fill" id="ram-fill-free" style="background:linear-gradient(90deg,var(--ok),rgba(16,185,129,0.5)); width:0%;"></div></div></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="sg">
+      <div class="sc2"><div class="slbl">Total Mapping</div><div class="sv ok" id="ram-sg-tot">—</div></div>
+      <div class="sc2"><div class="slbl">Active Load</div><div class="sv w" id="ram-sg-use">—</div></div>
+    </div>
+    <div class="ib okb" id="ram-explanation">Loading memory parameters...</div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <div class="screen ds" id="det-cpu">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">⚙️</div>
+      <div><div class="dtitle">Processor</div><div class="dstatus" id="cpu-dstatus" style="color:var(--ok);">✓ Genuine — matches official spec</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="cpu-scene">
+        <div class="cpu-die">
+          <div class="cpu-block cpu-core">C1</div><div class="cpu-block cpu-core">C2</div><div class="cpu-block cpu-core">C3</div>
+          <div class="cpu-block cpu-core">C4</div><div class="cpu-block cpu-center">GPU</div><div class="cpu-block cpu-core">C5</div>
+          <div class="cpu-block cpu-core">C6</div><div class="cpu-block cpu-core">C7</div><div class="cpu-block cpu-core">C8</div>
+        </div>
+        <div class="cpu-stats">
+          <div class="sc2"><div class="slbl">Chipset</div><div class="sv ok" style="font-size:13px" id="cpu-chipset">—</div></div>
+          <div class="sc2"><div class="slbl">Android</div><div class="sv ok" id="cpu-android">—</div></div>
+          <div class="sc2"><div class="slbl">SoC Model</div><div class="sv ok" style="font-size:13px" id="cpu-soc">—</div></div>
+          <div class="sc2"><div class="slbl">Verdict</div><div class="sv ok" style="font-size:13px" id="cpu-verdict">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ib okb" id="cpu-explanation">Loading processor analysis...</div>
+    <div class="action-card act-minor">
+      <div class="act-label">✓ No Action Needed</div>
+      <div class="act-title">Processor looks original</div>
+      <div class="act-body">Your processor matches manufacturer records. This is one of the hardest components to fake. <strong>No action required.</strong></div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <div class="screen ds" id="det-dsp">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">🖥️</div>
+      <div><div class="dtitle">Display</div><div class="dstatus" id="dsp-dstatus" style="color:var(--ok);">✓ Genuine — matches official spec</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Component Analysis</div>
+      <div class="disp-scene">
+        <div class="disp-frame"><div class="disp-inner"><div class="px-grid" id="px-grid"></div><div class="disp-overlay"><div class="disp-label"><div class="disp-res" id="dsp-res">—</div><div class="disp-hz" id="dsp-hz">—</div><div class="rbar-wrap"><div class="rbar"></div></div></div></div></div></div>
+        <div class="disp-stats">
+          <div class="sc2"><div class="slbl">Resolution</div><div class="sv ok" style="font-size:13px" id="dsp-resolution">—</div></div>
+          <div class="sc2"><div class="slbl">Verdict</div><div class="sv ok" id="dsp-verdict">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="ib okb" id="dsp-explanation">Loading display analysis...</div>
+    <div class="action-card act-minor">
+      <div class="act-label">✓ No Action Needed</div>
+      <div class="act-title">Display looks original</div>
+      <div class="act-body">Display swaps usually show reduced resolution or refresh rate — check the values above for any mismatches.</div>
+    </div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <div class="screen ds" id="det-sns">
+    <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
+    <div class="dh">
+      <div class="dbi" style="background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);">🧭</div>
+      <div><div class="dtitle">Sensors Audit</div><div class="dstatus" id="sns-dstatus" style="color:var(--ok);">✓ Physical sensors verified</div></div>
+    </div>
+    <div class="dg">
+      <div class="dg-lbl">Hardware Forensics</div>
+      <div class="info-full" id="sns-list-container">
+        <!-- Sensor rows populated dynamically -->
+      </div>
+    </div>
+    <div class="ib okb" id="sns-explanation">Sensors help verify component integration and trace whether modules like the screen assembly (containing light/proximity sensors) were replaced with generic components.</div>
+    <button class="btn-p" onclick="go('results')">← Back to Report</button>
+  </div>
+
+  <div class="screen hs" id="health">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">❤️</div>
+      <div><h2>Health Check</h2><p id="health-sub">Connect phone and scan first</p></div>
+    </div>
+    <div class="health-overview">
+      <div class="health-score-big" id="health-score-big">—</div>
+      <div class="health-score-label">Overall Health Score</div>
+      <div class="health-grade" id="health-grade">Scan first</div>
+    </div>
+    <div class="health-bar-grid">
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">🔋</span><span class="hb-name">Battery</span></div><span class="hb-pct" id="hb-bat-pct" style="color:var(--ok)">—</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-bat" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub" id="hb-bat-sub">Scan your phone to see battery health</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">💾</span><span class="hb-name">Storage</span></div><span class="hb-pct" id="hb-sto-pct" style="color:var(--ok)">—</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-sto" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub" id="hb-sto-sub">Scan your phone to see storage health</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">⚙️</span><span class="hb-name">Processor</span></div><span class="hb-pct" id="hb-cpu-pct" style="color:var(--ok)">—</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-cpu" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub" id="hb-cpu-sub">Scan your phone to see processor info</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">🌡️</span><span class="hb-name">Temperature</span></div><span class="hb-pct" id="hb-tmp-pct" style="color:var(--ok)">—</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-tmp" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub" id="hb-tmp-sub">Scan your phone to see temperature</div>
+      </div>
+      <div class="hb">
+        <div class="hb-header"><div class="hb-left"><span class="hb-icon">🖥️</span><span class="hb-name">Display</span></div><span class="hb-pct" id="hb-dsp-pct" style="color:var(--ok)">—</span></div>
+        <div class="hb-track"><div class="hb-fill" id="hb-dsp" style="background:linear-gradient(90deg,var(--ok),#34d399)"></div></div>
+        <div class="hb-sub" id="hb-dsp-sub">Scan your phone to see display health</div>
+      </div>
+    </div>
+    <div class="action-card act-mod" id="health-action">
+      <div class="act-label">💡 Tip</div>
+      <div class="act-title">Scan your phone first</div>
+      <div class="act-body" id="health-act-body">Go to Scan My Phone on the dashboard to get your real health data.</div>
+    </div>
+    <div style="padding-bottom:20px;"></div>
+    <button class="btn-p" onclick="go('dashboard')">← Back to Dashboard</button>
+  </div>
+
+  <div class="screen infos" id="phoneinfo">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(108,142,245,0.1);border:1px solid rgba(96,165,250,0.2);">📱</div>
+      <div><h2>Phone Info</h2><p id="info-sub">Scan your phone to see details</p></div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Device</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label">Model</div><div class="info-value small" id="info-model">—</div></div>
+        <div class="info-card"><div class="info-label">Brand</div><div class="info-value" id="info-brand">—</div></div>
+        <div class="info-card"><div class="info-label">Android</div><div class="info-value" id="info-android">—</div></div>
+        <div class="info-card"><div class="info-label">Chipset</div><div class="info-value small" id="info-chipset">—</div></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Display</div>
+      <div class="info-full">
+        <div class="info-row"><span class="info-row-key">Resolution</span><span class="info-row-val" id="info-res">—</span></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Battery</div>
+      <div class="info-full">
+        <div class="info-row"><span class="info-row-key">Level</span><span class="info-row-val" id="info-bat-lvl">—</span></div>
+        <div class="info-row"><span class="info-row-key">Health</span><span class="info-row-val" id="info-bat-hlt">—</span></div>
+        <div class="info-row"><span class="info-row-key">Temperature</span><span class="info-row-val" id="info-bat-tmp">—</span></div>
+        <div class="info-row"><span class="info-row-key">Voltage</span><span class="info-row-val" id="info-bat-vol">—</span></div>
+        <div class="info-row"><span class="info-row-key">Technology</span><span class="info-row-val" id="info-bat-tec">—</span></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">Storage</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label">Total</div><div class="info-value" id="info-sto-tot">—</div></div>
+        <div class="info-card"><div class="info-label">Used</div><div class="info-value" id="info-sto-use">—</div></div>
+        <div class="info-card"><div class="info-label">Free</div><div class="info-value" id="info-sto-fre">—</div></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="info-sec-title">RAM</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-label">Total</div><div class="info-value" id="info-ram-tot">—</div></div>
+        <div class="info-card"><div class="info-label">Available</div><div class="info-value" id="info-ram-avl">—</div></div>
+      </div>
+    </div>
+    <div style="padding-bottom:20px;"></div>
+  </div>
+
+  <div class="screen bas" id="ba">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">🔄</div>
+      <div><h2>Before / After</h2><p>Pre vs post repair comparison</p></div>
+    </div>
+    <div class="bat">
+      <div class="brow bhr"><div class="bc">Component</div><div class="bc">Before</div><div class="bc">After</div></div>
+      <div class="brow"><div class="bc blbl">🔋 Battery</div><div class="bc bok" id="ba-bat-before">—</div><div class="bc" id="ba-bat-after">—</div></div>
+      <div class="brow"><div class="bc blbl">💾 Storage</div><div class="bc bok" id="ba-sto-before">—</div><div class="bc" id="ba-sto-after">—</div></div>
+      <div class="brow"><div class="bc blbl">📊 RAM</div><div class="bc bok" id="ba-ram-before">—</div><div class="bc" id="ba-ram-after">—</div></div>
+      <div class="brow"><div class="bc blbl">⚙️ CPU</div><div class="bc bok" id="ba-cpu-before">—</div><div class="bc" id="ba-cpu-after">—</div></div>
+      <div class="brow"><div class="bc blbl">🖥️ Display</div><div class="bc bok" id="ba-dsp-before">—</div><div class="bc" id="ba-dsp-after">—</div></div>
+    </div>
+    <div class="ob">Scan your phone before and after repair to compare. Save a scan before handing your phone over.</div>
+    <button class="btn-p" onclick="saveCurrentScan()">💾 Save Current Scan as "Before"</button>
+    <button class="btn-s" style="margin-top:10px" onclick="go('dashboard')">Back to Dashboard</button>
+  </div>
+
+  <div class="screen hs" id="history">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);">🕘</div>
+      <div><h2>Scan History</h2><p>Your past scans and reports</p></div>
+    </div>
+    <div id="history-list"></div>
+    <div style="padding-bottom:20px;"></div>
+  </div>
+
+  <div class="screen precs" id="precautions">
+    <button class="nav-bk" onclick="go('dashboard')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Dashboard</button>
+    <div class="sec-hdr">
+      <div class="sec-hdr-icon" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);">🛡️</div>
+      <div><h2>Precautions</h2><p>Stay informed. Stay protected.</p></div>
+    </div>
+    <div class="prec-tab">
+      <button class="ptab active" onclick="switchTab(0)">📱 Phone Health</button>
+      <button class="ptab" onclick="switchTab(1)">🔧 Before Repair</button>
+      <button class="ptab" onclick="switchTab(2)">✅ After Repair</button>
+    </div>
+    <div class="prec-list active" id="ptab-0">
+      <div class="prec-item highlight"><div class="prec-num">01</div><div class="prec-content"><div class="prec-title">Keep battery between 20–80%</div><div class="prec-desc">Charging to 100% every time degrades your battery faster. Aim to keep it between 20–80% for maximum battery lifespan.</div></div></div>
+      <div class="prec-item"><div class="prec-num">02</div><div class="prec-content"><div class="prec-title">Avoid extreme temperatures</div><div class="prec-desc">Heat is your battery's biggest enemy. Don't leave your phone in direct sunlight or a hot car.</div></div></div>
+      <div class="prec-item"><div class="prec-num">03</div><div class="prec-content"><div class="prec-title">Use original or certified chargers only</div><div class="prec-desc">Cheap third-party chargers can deliver unstable voltage, damaging your battery and charging circuit over time.</div></div></div>
+      <div class="prec-item"><div class="prec-num">04</div><div class="prec-content"><div class="prec-title">Clear cache and storage regularly</div><div class="prec-desc">A phone over 80% full storage starts slowing down significantly. Regularly clear cache and move photos/files to cloud or PC.</div></div></div>
+      <div class="prec-item"><div class="prec-num">05</div><div class="prec-content"><div class="prec-title">Run a Scrutin health check monthly</div><div class="prec-desc">Track your phone's health over time. A sudden drop in battery capacity or performance can alert you early to problems.</div></div></div>
+    </div>
+    <div class="prec-list" id="ptab-1">
+      <div class="prec-item highlight"><div class="prec-num">01</div><div class="prec-content"><div class="prec-title">Always scan before handing over</div><div class="prec-desc">Run a Scrutin scan and save the report before giving your phone for any repair. This is your proof of original components.</div></div></div>
+      <div class="prec-item warn-item"><div class="prec-num">02</div><div class="prec-content"><div class="prec-title">Note your IMEI and serial number</div><div class="prec-desc">Go to Settings → About Phone and screenshot your IMEI and serial number. This proves the device returned is actually yours.</div></div></div>
+      <div class="prec-item"><div class="prec-num">03</div><div class="prec-content"><div class="prec-title">Remove SIM and memory card</div><div class="prec-desc">Always remove your SIM card and SD card before handing over your phone. No repair requires access to these.</div></div></div>
+      <div class="prec-item"><div class="prec-num">04</div><div class="prec-content"><div class="prec-title">Ask for a written estimate first</div><div class="prec-desc">Get the repair cost and parts list in writing before they start. A trustworthy shop will always agree to this.</div></div></div>
+      <div class="prec-item warn-item"><div class="prec-num">05</div><div class="prec-content"><div class="prec-title">Ask specifically for original parts</div><div class="prec-desc">Say clearly — "I want original manufacturer parts only." Ask them to show you the packaging when the part arrives.</div></div></div>
+      <div class="prec-item"><div class="prec-num">06</div><div class="prec-content"><div class="prec-title">Photograph your phone's condition</div><div class="prec-desc">Take clear photos of all sides of your phone before handing over. Protects you if they cause additional damage during repair.</div></div></div>
+    </div>
+    <div class="prec-list" id="ptab-2">
+      <div class="prec-item highlight"><div class="prec-num">01</div><div class="prec-content"><div class="prec-title">Scan immediately after getting it back</div><div class="prec-desc">Run a Scrutin scan right there at the shop before you leave. If something looks off, you can address it on the spot.</div></div></div>
+      <div class="prec-item warn-item"><div class="prec-num">02</div><div class="prec-content"><div class="prec-title">Check the repaired component first</div><div class="prec-desc">If they replaced the battery, check battery capacity. If they replaced the screen, check resolution and refresh rate.</div></div></div>
+      <div class="prec-item"><div class="prec-num">03</div><div class="prec-content"><div class="prec-title">Verify the warranty seal</div><div class="prec-desc">Check if the warranty sticker is intact or has been tampered with. Most brands place these over screws — any tampering is a red flag.</div></div></div>
+      <div class="prec-item"><div class="prec-num">04</div><div class="prec-content"><div class="prec-title">Ask for the old part back</div><div class="prec-desc">Always ask them to return the replaced component. A trustworthy shop will hand it over. If they refuse — be suspicious.</div></div></div>
+      <div class="prec-item warn-item"><div class="prec-num">05</div><div class="prec-content"><div class="prec-title">If something looks off — go to an authorized center</div><div class="prec-desc">Don't go back to the same shop. Visit your brand's authorized service center — Samsung, Xiaomi, Realme, OnePlus, Apple — they use genuine parts and give you a warranty.</div></div></div>
+    </div>
+    <div style="padding-bottom:24px;"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ─── SERVICE CENTER DATABASE ─────────────────────────────
+const SERVICE_CENTERS = {
+  'samsung' : { name: 'Samsung Care+ / Smart Café', url: 'samsung.com/in/support' },
+  'vivo'    : { name: 'Vivo Service Center', url: 'vivo.com/in/service' },
+  'xiaomi'  : { name: 'Mi Service Center', url: 'mi.com/in/service' },
+  'redmi'   : { name: 'Mi Service Center', url: 'mi.com/in/service' },
+  'realme'  : { name: 'Realme Service Center', url: 'realme.com/in/support' },
+  'oneplus' : { name: 'OnePlus Service Center', url: 'oneplus.com/in/support' },
+  'oppo'    : { name: 'Oppo Service Center', url: 'oppo.com/in/support' },
+  'apple'   : { name: 'Apple Authorized Provider', url: 'apple.com/in/retail' },
+  'motorola': { name: 'Motorola Service Center', url: 'motorola.in/support' },
+  'nothing' : { name: 'Nothing Service Center', url: 'nothing.tech/support' },
+};
+
+function getServiceCenter(brand) {
+  const key = (brand || '').toLowerCase();
+  return SERVICE_CENTERS[key] || { name: brand + ' Authorized Service Center', url: 'google.com/search?q=' + brand + '+service+center+near+me' };
+}
+
+// ─── GLOBAL DATA ─────────────────────────────────────────
+let scanData = null;
+let beforeScan = null;
+// Works when opened as a file OR via Flask at http://127.0.0.1:5000
+const API_BASE = window.location.port === '5000' ? '' : 'http://127.0.0.1:5000';
+let scanInProgress = false;
+
+// ─── NAVIGATION ──────────────────────────────────────────
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const activeScreen = document.getElementById(id);
+  if (activeScreen) activeScreen.classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='det-bat') initBatteryDetail();
+  if(id==='det-sto') initStorageDetail();
+  if(id==='det-ram') initRAMDetail();
+  if(id==='det-cpu') initCPUDetail();
+  if(id==='det-dsp') initDisplay();
+  if(id==='det-sns') initSensorsDetail();
+  if(id==='health') initHealth();
+  if(id==='ba') initBeforeAfter();
+  if(id==='history') initHistory();
+}
+
+function switchTab(i) {
+  document.querySelectorAll('.ptab').forEach((t,idx) => t.classList.toggle('active', idx===i));
+  document.querySelectorAll('.prec-list').forEach((l,idx) => l.classList.toggle('active', idx===i));
+}
+
+// ─── SCAN FLOW ───────────────────────────────────────────
+function startScan() {
+  if (scanInProgress) return;
+  scanInProgress = true;
+
+  const btn = document.getElementById('btn-start-scan');
+  if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+
+  // Reset scanning step UI from any previous scan
+  ['si-bat','si-sto','si-cpu','si-dsp','si-ai','si-cmp'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('active', 'done');
+    el.querySelector('.sci-st').textContent = 'PENDING';
+  });
+  document.getElementById('pf').style.width = '0%';
+  document.getElementById('plbl').textContent = '0%';
+
+  const b = document.getElementById('stbar');
+  b.classList.remove('conn');
+  b.querySelector('.stxt').textContent = 'Connecting to device...';
+
+  go('scanning');
+  runScanWithFetch(btn);
+}
+
+function runScanWithFetch(btn) {
+  const steps = [
+    {id:'si-bat', p:'18%'},
+    {id:'si-sto', p:'36%'},
+    {id:'si-cpu', p:'54%'},
+    {id:'si-dsp', p:'65%'},
+    {id:'si-ai', p:'82%'},
+    {id:'si-cmp', p:'100%'}
+  ];
+  let step = 0;
+  let fetchDone = false;
+  let fetchData = null;
+  let fetchError = null;
+
+  const stbar = document.getElementById('stbar');
+
+  fetch(API_BASE + '/scan')
+    .then(async res => {
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Scan failed');
+        return data;
+      } else {
+        throw new Error('Server returned invalid response (Not JSON). Ensure Flask server is running.');
+      }
+    })
+    .then(data => { fetchData = data; })
+    .catch(err => { fetchError = err; })
+    .finally(() => { fetchDone = true; });
+
+  function finishScan() {
+    scanInProgress = false;
+    if (btn) { btn.disabled = false; btn.style.opacity = '1'; }
+
+    if (fetchError) {
+      go('connect');
+      stbar.querySelector('.stxt').textContent = '✕ ' + (fetchError.message || 'Scan failed');
+      return;
+    }
+
+    scanData = fetchData;
+    saveScanToHistory(fetchData);
+    stbar.classList.add('conn');
+    stbar.querySelector('.stxt').textContent = '✓ ' + fetchData.device.brand + ' ' + fetchData.device.model + ' detected';
+    populateAll();
+    go('results');
+  }
+
+  function tick() {
+    if (step > 0) {
+      const prev = document.getElementById(steps[step - 1].id);
+      prev.classList.remove('active');
+      prev.classList.add('done');
+      prev.querySelector('.sci-st').textContent = 'DONE ✓';
+    }
+    if (step < steps.length) {
+      const cur = document.getElementById(steps[step].id);
+      cur.classList.add('active');
+      cur.querySelector('.sci-st').textContent = 'SCANNING...';
+      document.getElementById('pf').style.width = steps[step].p;
+      document.getElementById('plbl').textContent = steps[step].p;
+      step++;
+      setTimeout(tick, 700);
+    } else if (!fetchDone) {
+      setTimeout(tick, 300);
+    } else {
+      setTimeout(finishScan, 400);
+    }
+  }
+
+  tick();
+}
+
+// ─── PRIVACY AUDITOR ENGINE ─────────────────────────────
+function runAppAudit() {
+  const loader = document.getElementById('audit-loading');
+  const results = document.getElementById('audit-results');
+  loader.style.display = 'block';
+  results.textContent = 'Analyzing installed apps...';
+  fetch(API_BASE + '/audit_apps')
+    .then(async res => {
+      const contentType = res.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Audit failed');
+        return data;
+      } else {
+        throw new Error('Server returned invalid response (Not JSON). Ensure Flask server is running.');
+      }
+    })
+    .then(data => {
+      loader.style.display = 'none';
+      results.textContent = data.security_audit || 'No audit result returned.';
+    }).catch(err => {
+      loader.style.display = 'none';
+      results.textContent = '❌ ' + (err.message || 'Failed to connect to engine.');
+    });
+}
+
+// ─── POPULATE ALL DATA ───────────────────────────────────
+function populateAll() {
+  if (!scanData) return;
+  const d = scanData;
+  populateResults(d);
+  populatePhoneInfo(d);
+  populateHealthCheck(d);
+}
+
+function populateResults(d) {
+  document.getElementById('res-device-name').textContent = d.device.brand + ' ' + d.device.model;
+  document.getElementById('res-device-sub').textContent  = 'Scanned just now · Android ' + d.device.android;
+
+  const score = d.trust_score;
+  const scoreEl = document.getElementById('res-trust-score');
+  if (score === null || score === undefined || d.verification_status === 'unverified') {
+    scoreEl.innerHTML = '—<span style="font-size:14px;opacity:0.45"> unverified</span>';
+  } else {
+    scoreEl.innerHTML = score + '<span style="font-size:18px;opacity:0.45">/10</span>';
+  }
+
+  const comps = d.comparisons || {};
+  const scorable = Object.entries(comps).filter(([k]) => k !== 'battery');
+  const flags = scorable.map(([, c]) => c.flag);
+  const dangerCount = flags.filter(f => f==='danger').length;
+  const warnCount   = flags.filter(f => f==='warn').length;
+  const summaryEl   = document.getElementById('res-summary');
+  if (d.verification_status === 'unverified') {
+    summaryEl.textContent = '⚠ Could not fetch official specs. Comparisons are unavailable.';
+  } else if (dangerCount > 0 || warnCount > 0) {
+    summaryEl.textContent = '⚠ ' + (dangerCount + warnCount) + ' component(s) need attention. Check details below.';
+  } else {
+    summaryEl.textContent = '✓ All components look genuine. No suspicious activity detected.';
+    summaryEl.style.background = 'rgba(16,185,129,0.06)';
+    summaryEl.style.borderColor = 'rgba(16,185,129,0.18)';
+    summaryEl.style.color = 'rgba(16,185,129,0.9)';
+    summaryEl.style.setProperty('--warn', 'var(--ok)');
+  }
+
+  setCard('bat-card', 'bat-pill', 'bat-cr', comps.battery || {flag:'ok', message:'Battery data retrieved'});
+  setCard('sto-card', 'sto-pill', 'sto-cr', comps.storage  || {flag:'ok', message:'Storage: ' + d.storage.used + ' used of ' + d.storage.total});
+  setCard('ram-card', 'ram-pill', 'ram-cr', comps.ram      || {flag:'ok', message:'RAM parsed: ' + d.ram.total});
+  setCard('cpu-card', 'cpu-pill', 'cpu-cr', comps.chipset  || {flag:'ok', message:'Chipset: ' + d.device.chipset});
+  setCard('dsp-card', 'dsp-pill', 'dsp-cr', comps.display  || {flag:'ok', message:'Display: ' + d.display.resolution});
+
+  // Tweak 1: Sensors list status
+  const snsCr = document.getElementById('sns-cr');
+  if (snsCr) {
+    const sensorCount = (d.sensors || []).length;
+    snsCr.textContent = `${sensorCount} physical sensors verified · tap for details`;
+  }
+
+  // Tweak 2: Glow the phone mockup parts
+  setMockGlow('mock-dsp', comps.display);
+  setMockGlow('mock-cpu', comps.chipset);
+  setMockGlow('mock-bat', comps.battery || {flag: 'ok'});
+  setMockGlow('mock-ram', comps.ram);
+  setMockGlow('mock-sto', comps.storage);
+  setMockGlow('mock-sns', d.sensors && d.sensors.length > 0 ? {flag: 'ok'} : {flag: 'warn'});
+}
+
+function setCard(cardId, pillId, crId, comp) {
+  const card = document.getElementById(cardId);
+  const pill = document.getElementById(pillId);
+  const cr   = document.getElementById(crId);
+  if (!card || !pill || !cr) return;
+
+  card.className = 'card2 ' + (comp.flag==='ok' ? 'ok2' : comp.flag==='warn' ? 'wn2' : 'bd2');
+  if (cardId === 'bat-card' && comp.flag === 'ok') {
+    pill.textContent = 'HEALTHY';
+  } else {
+    pill.textContent = comp.flag==='ok' ? 'GENUINE' : comp.flag==='warn' ? 'CHECK' : 'FLAGGED';
+  }
+  cr.textContent   = (comp.message || '') + ' · tap for details';
+}
+
+function populatePhoneInfo(d) {
+  document.getElementById('info-sub').textContent      = d.device.brand + ' ' + d.device.model;
+  document.getElementById('info-brand').textContent    = d.device.brand;
+  document.getElementById('info-model').textContent    = d.device.model;
+  document.getElementById('info-android').textContent  = d.device.android;
+  document.getElementById('info-chipset').textContent  = d.device.chipset;
+  document.getElementById('info-res').textContent      = d.display.resolution;
+  document.getElementById('info-bat-lvl').textContent  = d.battery.level + '%';
+  document.getElementById('info-bat-hlt').textContent  = d.battery.health;
+  document.getElementById('info-bat-tmp').textContent  = d.battery.temperature;
+  document.getElementById('info-bat-vol').textContent  = d.battery.voltage;
+  document.getElementById('info-bat-tec').textContent  = d.battery.technology;
+  document.getElementById('info-sto-tot').textContent  = d.storage.total;
+  document.getElementById('info-sto-use').textContent  = d.storage.used;
+  document.getElementById('info-sto-fre').textContent  = d.storage.free;
+  document.getElementById('info-ram-tot').textContent  = d.ram.total;
+  document.getElementById('info-ram-avl').textContent  = d.ram.available;
+}
+
+function populateHealthCheck(d) {
+  const batLevel  = parseInt(d.battery.level) || 0;
+  const batHealth = d.battery.health === 'Good' ? 90 : 50;
+  const temp      = parseFloat(d.battery.temperature) || 30;
+  const tempScore = temp < 35 ? 95 : temp < 40 ? 70 : 40;
+
+  const stoFreePct = Math.round((parseFloat(d.storage.free) / (parseFloat(d.storage.total) || 1)) * 100);
+
+  const cpuPct = (d.comparisons && d.comparisons.chipset && d.comparisons.chipset.flag === 'ok') ? 95 : 50;
+  const dspPct = (d.comparisons && d.comparisons.display && d.comparisons.display.flag === 'ok') ? 95 : 50;
+
+  const bars = [
+    {id:'hb-bat', ppct:'hb-bat-pct', pct: batLevel,   sub: 'Level ' + d.battery.level + '% · ' + d.battery.health + ' · ' + d.battery.temperature},
+    {id:'hb-sto', ppct:'hb-sto-pct', pct: stoFreePct, sub: 'Free space · ' + d.storage.free + ' of ' + d.storage.total},
+    {id:'hb-cpu', ppct:'hb-cpu-pct', pct: cpuPct,     sub: d.device.codename + ' · ' + d.device.chipset},
+    {id:'hb-tmp', ppct:'hb-tmp-pct', pct: tempScore,  sub: d.battery.temperature + ' · ' + (temp < 35 ? 'Normal temperature' : temp < 40 ? 'Slightly warm' : 'Overheating detected')},
+    {id:'hb-dsp', ppct:'hb-dsp-pct', pct: dspPct,     sub: d.display.resolution + ' display'},
+  ];
+
+  const overall = Math.round(bars.reduce((a,b) => a + b.pct, 0) / bars.length);
+
+  document.getElementById('health-sub').textContent = d.device.brand + ' ' + d.device.model;
+  document.getElementById('health-score-big').textContent = overall;
+
+  const grade = document.getElementById('health-grade');
+  if (overall >= 90)      { grade.textContent = 'Excellent'; grade.style.color = 'var(--ok)'; }
+  else if (overall >= 75) { grade.textContent = 'Good';      grade.style.color = 'var(--ok)'; }
+  else if (overall >= 60) { grade.textContent = 'Fair';      grade.style.color = 'var(--warn)'; }
+  else                    { grade.textContent = 'Poor';      grade.style.color = 'var(--danger)'; }
+
+  bars.forEach(b => {
+    const color = b.pct >= 75 ? 'var(--ok)' : b.pct >= 50 ? 'var(--warn)' : 'var(--danger)';
+    document.getElementById(b.id).style.width      = b.pct + '%';
+    document.getElementById(b.id).style.background = 'linear-gradient(90deg,' + color + ',' + color + '88)';
+    document.getElementById(b.ppct).textContent    = b.pct + '%';
+    document.getElementById(b.ppct).style.color    = color;
+    const sub = document.getElementById(b.id.replace('hb-','hb-') + '-sub') || document.getElementById(b.id + '-sub');
+    if (sub) sub.textContent = b.sub;
+  });
+
+  ['bat','sto','cpu','tmp','dsp'].forEach((k,i) => {
+    const el = document.getElementById('hb-' + k + '-sub');
+    if (el) el.textContent = bars[i].sub;
+  });
+}
+
+// ─── BATTERY DETAIL ──────────────────────────────────────
+function initBatteryDetail() {
+  if (!scanData) return;
+  const d   = scanData;
+  const bat = d.battery;
+  const lvl = parseInt(bat.level) || 0;
+  const sc  = getServiceCenter(d.device.brand);
+
+  setTimeout(() => {
+    const fill = document.getElementById('batt-fill');
+    const pctEl = document.getElementById('batt-pct');
+    const ring  = document.getElementById('rfg');
+    const rpct  = document.getElementById('rpct');
+    fill.style.width      = lvl + '%';
+    fill.style.background = lvl >= 50 ? 'linear-gradient(90deg,var(--ok),rgba(16,185,129,0.6))' : lvl >= 20 ? 'linear-gradient(90deg,var(--warn),rgba(245,158,11,0.6))' : 'linear-gradient(90deg,var(--danger),rgba(239,68,68,0.6))';
+    ring.style.strokeDashoffset = 214 - (lvl/100)*214;
+    ring.setAttribute('stroke', lvl >= 50 ? 'var(--ok)' : lvl >= 20 ? 'var(--warn)' : 'var(--danger)');
+    let c=0; const ti=setInterval(()=>{c=Math.min(c+2,lvl);pctEl.textContent=c+'%';rpct.textContent=c+'%';if(c>=lvl)clearInterval(ti);},25);
+  }, 300);
+
+  document.getElementById('ri-level').textContent  = bat.level + '%';
+  document.getElementById('ri-health').textContent = bat.health;
+  document.getElementById('ri-temp').textContent   = bat.temperature;
+  document.getElementById('ri-volt').textContent   = bat.voltage;
+  document.getElementById('bst-level').textContent = bat.level + '%';
+  document.getElementById('bst-health').textContent= bat.health;
+  document.getElementById('bst-tech').textContent  = bat.technology;
+
+  document.getElementById('bat-sg-level').textContent  = bat.level + '%';
+  document.getElementById('bat-sg-health').textContent = bat.health;
+  document.getElementById('bat-sg-temp').textContent   = bat.temperature;
+  document.getElementById('bat-sg-volt').textContent   = bat.voltage;
+
+  const isGood = bat.health === 'Good' && lvl >= 20;
+  const dbi    = document.getElementById('bat-dbi');
+  const status = document.getElementById('bat-dstatus');
+  const action = document.getElementById('bat-action');
+  const expEl  = document.getElementById('bat-explanation');
+  const svcEl  = document.getElementById('bat-service');
+
+  if (isGood) {
+    dbi.style.background    = 'rgba(16,185,129,0.1)';
+    dbi.style.borderColor   = 'rgba(16,185,129,0.2)';
+    status.textContent      = '✓ Battery looks healthy';
+    status.style.color      = 'var(--ok)';
+    action.className        = 'action-card act-minor';
+    document.getElementById('bat-act-label').textContent = '✓ No Action Needed';
+    document.getElementById('bat-act-title').textContent = 'Battery looks healthy';
+    document.getElementById('bat-act-body').textContent  = 'Your battery is reporting normal values. Health is ' + bat.health + ' at ' + bat.level + '%. No action required.';
+    expEl.textContent = 'Battery is at ' + bat.level + '% with ' + bat.health.toLowerCase() + ' health. Temperature is ' + bat.temperature + ' which is normal. Voltage reads ' + bat.voltage + '.';
+    svcEl.style.display = 'none';
+  } else {
+    dbi.style.background    = 'rgba(245,158,11,0.1)';
+    dbi.style.borderColor   = 'rgba(245,158,11,0.2)';
+    status.textContent      = '⚠ Battery needs attention';
+    status.style.color      = 'var(--warn)';
+    action.className        = 'action-card act-mod';
+    document.getElementById('bat-act-label').textContent = '⚠ Attention Needed';
+    document.getElementById('bat-act-title').textContent = 'Battery may need replacement';
+    document.getElementById('bat-act-body').textContent  = 'Battery level is at ' + bat.level + '%. If draining faster than expected, consider getting it checked at a ' + d.device.brand + ' authorized service center.';
+    expEl.textContent = 'Battery is at ' + bat.level + '% with health status: ' + bat.health + '. Temperature: ' + bat.temperature + '. Voltage: ' + bat.voltage + '.';
+    svcEl.style.display = 'flex';
+    document.getElementById('bat-service-name').textContent = sc.name;
+    document.getElementById('bat-service-url').textContent  = sc.url;
+  }
+}
+
+// ─── STORAGE DETAIL ──────────────────────────────────────
+function initStorageDetail() {
+  if (!scanData) return;
+  const d   = scanData;
+  const sto = d.storage;
+
+  const total = parseFloat(sto.total) || 1;
+  const used  = parseFloat(sto.used)  || 0;
+  const free  = parseFloat(sto.free)  || 0;
+  const usedPct = Math.round((used/total)*100);
+  const freePct = Math.round((free/total)*100);
+
+  setTimeout(()=>{
+    document.getElementById('sp-total').style.width = '100%';
+    document.getElementById('sp-used').style.width  = usedPct + '%';
+    document.getElementById('sp-free').style.width  = freePct + '%';
+  },300);
+
+  document.getElementById('sto-total-lbl').textContent = sto.total;
+  document.getElementById('sto-used-lbl').textContent  = sto.used + ' (' + usedPct + '%)';
+  document.getElementById('sto-free-lbl').textContent  = sto.free + ' (' + freePct + '%)';
+  document.getElementById('sto-sg-total').textContent  = sto.total;
+  document.getElementById('sto-sg-used').textContent   = sto.used;
+  document.getElementById('sto-sg-free').textContent   = sto.free;
+  document.getElementById('sto-sg-usage').textContent = usedPct + '%';
+
+  const isOk = usedPct < 80;
+  document.getElementById('sto-dstatus').textContent  = isOk ? '✓ Storage looks normal' : '⚠ Storage getting full';
+  document.getElementById('sto-dstatus').style.color  = isOk ? 'var(--ok)' : 'var(--warn)';
+  document.getElementById('sto-explanation').textContent = 'Total storage: ' + sto.total + '. Used: ' + sto.used + ' (' + usedPct + '%). Free: ' + sto.free + '.';
+
+  const action = document.getElementById('sto-action');
+  if (isOk) {
+    action.className = 'action-card act-minor';
+    document.getElementById('sto-act-label').textContent = '✓ No Action Needed';
+    document.getElementById('sto-act-title').textContent = 'Storage looks fine';
+    document.getElementById('sto-act-body').textContent  = 'Storage usage is at ' + usedPct + '% which is healthy. Keep it below 80% for best performance.';
+  } else {
+    action.className = 'action-card act-mod';
+    document.getElementById('sto-act-label').textContent = '⚠ Storage Getting Full';
+    document.getElementById('sto-act-title').textContent = 'Consider freeing up space';
+    document.getElementById('sto-act-body').textContent  = 'Storage is ' + usedPct + '% full. Performance may slow down. Delete unused apps, photos, and files or move them to cloud storage.';
+  }
+}
+
+// ─── RAM DETAIL ──────────────────────────────────────────
+function initRAMDetail() {
+  if (!scanData) return;
+  
+  const totalStr = scanData.ram.total || "0 GB";
+  const availStr = scanData.ram.available || "0 GB";
+  
+  const t_val = parseFloat(totalStr) || 1;
+  const a_val = parseFloat(availStr) || 0;
+  const u_val = Math.max(0, t_val - a_val);
+  
+  const u_pct = Math.round((u_val / t_val) * 100);
+  const a_pct = Math.round((a_val / t_val) * 100);
+
+  setTimeout(() => {
+    const fillUse = document.getElementById('ram-fill-use');
+    const fillFree = document.getElementById('ram-fill-free');
+    if(fillUse) fillUse.style.width = u_pct + '%';
+    if(fillFree) fillFree.style.width = a_pct + '%';
+  }, 300);
+
+  document.getElementById('ram-tot-lbl').textContent = totalStr;
+  document.getElementById('ram-use-lbl').textContent = u_val.toFixed(1) + ' GB (' + u_pct + '%)';
+  document.getElementById('ram-free-lbl').textContent = availStr + ' (' + a_pct + '%)';
+  document.getElementById('ram-sg-tot').textContent = totalStr;
+  document.getElementById('ram-sg-use').textContent = u_val.toFixed(1) + ' GB';
+  
+  const statusEl = document.getElementById('ram-dstatus');
+  if (statusEl && scanData.comparisons && scanData.comparisons.ram) {
+    const isGen = scanData.comparisons.ram.flag === 'ok';
+    statusEl.textContent = isGen ? "✓ Memory allocation verified" : "⚠ Unexpected memory signature";
+    statusEl.style.color = isGen ? "var(--ok)" : "var(--warn)";
+  }
+  
+  document.getElementById('ram-explanation').textContent = `Device physically maps ${totalStr} total hardware memory, with ${availStr} currently available for operations.`;
+}
+
+// ─── CPU DETAIL ──────────────────────────────────────────
+function initCPUDetail() {
+  if (!scanData) return;
+  const d = scanData;
+  document.getElementById('cpu-chipset').textContent  = d.device.chipset + (d.device.codename ? ' (' + d.device.codename + ')' : '');
+  document.getElementById('cpu-android').textContent  = d.device.android;
+  document.getElementById('cpu-soc').textContent      = d.device.soc_model || 'N/A';
+  document.getElementById('cpu-verdict').textContent  = 'Detected';
+  document.getElementById('cpu-dstatus').textContent  = '✓ Processor info retrieved';
+  document.getElementById('cpu-explanation').textContent = 'Chipset: ' + d.device.chipset + '. Running Android ' + d.device.android + '. Codenamed: ' + (d.device.codename || 'N/A') + '.';
+}
+
+// ─── DISPLAY DETAIL ──────────────────────────────────────
+function initDisplay() {
+  if (scanData) {
+    const res = scanData.display.resolution;
+    document.getElementById('dsp-res').textContent        = res;
+    document.getElementById('dsp-hz').textContent          = 'Detected';
+    document.getElementById('dsp-resolution').textContent = res;
+    document.getElementById('dsp-verdict').textContent    = 'Detected';
+    document.getElementById('dsp-dstatus').textContent    = '✓ Display info retrieved';
+    document.getElementById('dsp-explanation').textContent = 'Display resolution: ' + res + '. This matches what ADB reported from your device directly.';
+  }
+  const grid = document.getElementById('px-grid');
+  if (grid.children.length > 0) return;
+  const colors = ['#6c8ef5','#a78bfa','#1e2d4a','#0f1a2e','#ffffff','#18ffff'];
+  for (let i=0; i<108; i++) {
+    const px = document.createElement('div');
+    px.className = 'px';
+    px.style.background        = colors[Math.floor(Math.random()*colors.length)];
+    px.style.animationDelay    = (Math.random()*4)+'s';
+    px.style.animationDuration = (2+Math.random()*3)+'s';
+    grid.appendChild(px);
+  }
+}
+
+function setMockGlow(elId, comp) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  
+  const rect = el.querySelector('rect');
+  const text = el.querySelector('text');
+  
+  // Find the corresponding flowing line
+  const flowId = elId.replace('mock-', 'flow-');
+  const flowLine = document.getElementById(flowId);
+  
+  // Reset classes and tracks
+  if (rect) {
+    rect.classList.remove('svg-green', 'svg-warn', 'svg-danger');
+  }
+  if (flowLine) {
+    flowLine.classList.remove('circuit-line-green', 'circuit-line-warn', 'circuit-line-danger');
+    flowLine.classList.add('circuit-line');
+  }
+  
+  if (!comp) {
+    if (rect) {
+      rect.style.stroke = 'rgba(255,255,255,0.12)';
+      rect.style.fill = 'rgba(255,255,255,0.02)';
+    }
+    if (text) text.style.fill = 'var(--textd)';
+    return;
+  }
+  
+  if (comp.flag === 'ok') {
+    if (rect) rect.classList.add('svg-green');
+    if (text) text.style.fill = 'var(--ok)';
+    if (flowLine) {
+      flowLine.classList.remove('circuit-line');
+      flowLine.classList.add('circuit-line-green');
+    }
+  } else if (comp.flag === 'warn') {
+    if (rect) rect.classList.add('svg-warn');
+    if (text) text.style.fill = 'var(--warn)';
+    if (flowLine) {
+      flowLine.classList.remove('circuit-line');
+      flowLine.classList.add('circuit-line-warn');
+    }
+  } else {
+    if (rect) rect.classList.add('svg-danger');
+    if (text) text.style.fill = 'var(--danger)';
+    if (flowLine) {
+      flowLine.classList.remove('circuit-line');
+      flowLine.classList.add('circuit-line-danger');
+    }
+  }
+}
+
+function initSensorsDetail() {
+  if (!scanData) return;
+  const list = document.getElementById('sns-list-container');
+  const sensors = scanData.sensors || [];
+  
+  if (!sensors.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--textd);">No physical sensors detected.</div>';
+    return;
+  }
+  
+  list.innerHTML = sensors.map((s) => {
+    return `<div class="info-row">
+      <span class="info-row-key" style="font-weight:600; color:var(--text);">${s.type}</span>
+      <span class="info-row-val" style="color:var(--accent); font-weight:600;">${s.name} <span style="font-size:10px; color:var(--textd); font-weight:normal;">(${s.vendor})</span></span>
+    </div>`;
+  }).join('');
+}
+
+// ─── HEALTH ──────────────────────────────────────────────
+function initHealth() {
+  if (!scanData) return;
+  populateHealthCheck(scanData);
+}
+
+// ─── HISTORY ─────────────────────────────────────────────
+const HISTORY_KEY = 'scrutin_history';
+const MAX_HISTORY = 20;
+
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveScanToHistory(data) {
+  const entry = {
+    id: Date.now().toString(),
+    savedAt: new Date().toISOString(),
+    data: data
+  };
+  let history = getHistory().filter(h => h.id !== entry.id);
+  history.unshift(entry);
+  if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+function initHistory() {
+  const list = document.getElementById('history-list');
+  const history = getHistory();
+
+  if (!history.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:40px;margin-bottom:12px;opacity:0.4;">🕘</div><div style="font-size:14px;color:var(--textd);line-height:1.6;">No scans yet. Scan your phone to see history here.</div></div>';
+    return;
+  }
+
+  list.innerHTML = history.map(entry => {
+    const d = entry.data;
+    const date = new Date(entry.savedAt);
+    const dateStr = date.toLocaleDateString() + ' · ' + date.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    const score = d.trust_score;
+    const scoreLabel = (score === null || score === undefined) ? '—' : score + '/10';
+    const device = (d.device.brand || '') + ' ' + (d.device.model || '');
+    return '<div class="hist-item" onclick="loadHistoryScan(\'' + entry.id + '\')">' +
+      '<div class="hist-item-top"><div class="hist-item-name">' + device + '</div><span class="hist-item-score">' + scoreLabel + '</span></div>' +
+      '<div class="hist-item-date">' + dateStr + '</div>' +
+      '<div class="hist-item-meta">Android ' + (d.device.android || '—') + ' · ' + (d.ram.total || '—') + ' RAM · ' + (d.storage.total || '—') + ' storage</div>' +
+      '</div>';
+  }).join('');
+}
+
+function loadHistoryScan(id) {
+  const entry = getHistory().find(h => h.id === id);
+  if (!entry) return;
+  scanData = entry.data;
+  populateAll();
+  go('results');
+}
+
+// ─── PDF REPORT ──────────────────────────────────────────
+function exportReportPDF() {
+  if (!scanData) {
+    alert('Run a scan first before saving a report.');
+    return;
+  }
+  if (!window.jspdf) {
+    alert('PDF library still loading. Try again in a second.');
+    return;
+  }
+
+  const d = scanData;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const margin = 14;
+  let y = 20;
+  const lineH = 7;
+  const pageW = doc.internal.pageSize.getWidth();
+
+  function addLine(text, size, bold) {
+    if (y > 275) { doc.addPage(); y = 20; }
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setFontSize(size || 11);
+    doc.setTextColor(30, 30, 30);
+    const lines = doc.splitTextToSize(text, pageW - margin * 2);
+    doc.text(lines, margin, y);
+    y += lines.length * lineH;
+  }
+
+  function addGap(n) { y += (n || 1) * 4; }
+
+  addLine('SCRUTIN — Hardware Scan Report', 18, true);
+  addGap(1);
+  addLine('Generated: ' + new Date().toLocaleString(), 10, false);
+  addLine('No trust — only data.', 10, false);
+  addGap(2);
+
+  addLine('DEVICE', 13, true);
+  addLine('Brand: ' + d.device.brand, 11);
+  addLine('Model: ' + d.device.model, 11);
+  addLine('Android: ' + d.device.android, 11);
+  addLine('Chipset: ' + d.device.chipset + (d.device.codename ? ' (codename: ' + d.device.codename + ')' : ''), 11);
+  addLine('Display: ' + d.display.resolution, 11);
+  addGap(2);
+
+  const score = d.trust_score;
+  addLine('TRUST SCORE: ' + (score === null || score === undefined ? 'Unverified' : score + ' / 10'), 13, true);
+  addLine('Status: ' + (d.verification_status || 'unknown'), 11);
+  addGap(2);
+
+  addLine('COMPONENT RESULTS', 13, true);
+  const comps = d.comparisons || {};
+  const labels = {battery:'Battery', storage:'Storage', ram:'RAM', chipset:'Processor', display:'Display'};
+  Object.keys(labels).forEach(key => {
+    const c = comps[key];
+    if (!c) return;
+    const verdict = c.flag === 'ok' ? 'GENUINE' : c.flag === 'warn' ? 'CHECK' : 'FLAGGED';
+    addLine(labels[key] + ' — ' + verdict, 11, true);
+    addLine(c.message || '', 10);
+    addGap(0.5);
+  });
+  addGap(1);
+
+  if (d.official) {
+    addLine('OFFICIAL SPECS (reference)', 13, true);
+    addLine('RAM: ' + (d.official.ram || 'N/A'), 10);
+    addLine('Storage: ' + (d.official.storage || 'N/A'), 10);
+    addLine('Chipset: ' + (d.official.chipset || 'N/A'), 10);
+    addLine('Display: ' + (d.official.display || 'N/A'), 10);
+    addLine('Battery: ' + (d.official.battery || 'N/A'), 10);
+    addGap(2);
+  }
+
+  addLine('SCANNED VALUES', 13, true);
+  addLine('Battery: ' + d.battery.level + '% · ' + d.battery.health + ' · ' + d.battery.temperature, 10);
+  addLine('Storage: ' + d.storage.total + ' total, ' + d.storage.used + ' used, ' + d.storage.free + ' free', 10);
+  addLine('RAM: ' + d.ram.total + ' total, ' + d.ram.available + ' available', 10);
+  addGap(2);
+
+  addLine('Disclaimer: Scrutin reports software-visible hardware data. Results indicate possibilities, not legal proof.', 9, false);
+
+  const filename = 'scrutin-' + (d.device.brand || 'device').toLowerCase() + '-' + Date.now() + '.pdf';
+  doc.save(filename);
+}
+
+// ─── BEFORE / AFTER ──────────────────────────────────────
+function saveCurrentScan() {
+  if (!scanData) { alert('Scan your phone first!'); return; }
+  beforeScan = JSON.parse(JSON.stringify(scanData));
+  localStorage.setItem('scrutin_before', JSON.stringify(beforeScan));
+  alert('Before scan saved! Give your phone for repair, then scan again to compare.');
+}
+
+function initBeforeAfter() {
+  const saved = localStorage.getItem('scrutin_before');
+  if (saved) beforeScan = JSON.parse(saved);
+
+  if (beforeScan) {
+    document.getElementById('ba-bat-before').textContent = beforeScan.battery.level + '% · ' + beforeScan.battery.health;
+    document.getElementById('ba-sto-before').textContent = beforeScan.storage.total;
+    document.getElementById('ba-ram-before').textContent = beforeScan.ram.total;
+    document.getElementById('ba-cpu-before').textContent = beforeScan.device.codename || beforeScan.device.chipset;
+    document.getElementById('ba-dsp-before').textContent = beforeScan.display.resolution;
+  }
+
+  if (scanData) {
+    const batAfter = document.getElementById('ba-bat-after');
+    const stoAfter = document.getElementById('ba-sto-after');
+    const ramAfter = document.getElementById('ba-ram-after');
+    const cpuAfter = document.getElementById('ba-cpu-after');
+    const dspAfter = document.getElementById('ba-dsp-after');
+
+    batAfter.textContent = scanData.battery.level + '% · ' + scanData.battery.health;
+    stoAfter.textContent = scanData.storage.total;
+    ramAfter.textContent = scanData.ram.total;
+    cpuAfter.textContent = scanData.device.codename || scanData.device.chipset;
+    dspAfter.textContent = scanData.display.resolution;
+
+    if (beforeScan) {
+      const batChanged = beforeScan.battery.health !== scanData.battery.health;
+      const stoChanged = beforeScan.storage.total !== scanData.storage.total;
+      const ramChanged = beforeScan.ram.total !== scanData.ram.total;
+      const cpuChanged = (beforeScan.device.codename || beforeScan.device.chipset) !== (scanData.device.codename || scanData.device.chipset);
+      const dspChanged = beforeScan.display.resolution !== scanData.display.resolution;
+
+      batAfter.className = batChanged ? 'bc bbd' : 'bc bok';
+      stoAfter.className = stoChanged ? 'bc bbd' : 'bc bok';
+      ramAfter.className = ramChanged ? 'bc bbd' : 'bc bok';
+      cpuAfter.className = cpuChanged ? 'bc bbd' : 'bc bok';
+      dspAfter.className = dspChanged ? 'bc bbd' : 'bc bok';
+    }
+  }
+}
+
+// ─── PARTICLES ───────────────────────────────────────────
+const canvas=document.getElementById('cv');
+const ctx=canvas.getContext('2d');
+let pts=[];
+function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resize();
+window.addEventListener('resize',resize);
+for(let i=0;i<45;i++){pts.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+0.2,a:Math.random()*0.28+0.05,c:Math.random()>.5?'108,142,245':'167,139,250'});}
+function anim(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c},${p.a})`;ctx.fill();});
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(108,142,245,${0.035*(1-d/110)})`;ctx.lineWidth=0.5;ctx.stroke();}}
+  requestAnimationFrame(anim);
+}
+anim();
+</script>
+</body>
+</html>
