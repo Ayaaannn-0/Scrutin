@@ -558,6 +558,34 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .app {
   transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Hover Synchronization Styling */
+.svg-chip.hover-boost rect {
+  stroke-width: 1.8px !important;
+}
+.svg-chip.hover-boost.svg-green rect {
+  filter: drop-shadow(0 0 12px rgba(16,185,129,0.7));
+}
+.svg-chip.hover-boost.svg-warn rect {
+  filter: drop-shadow(0 0 12px rgba(245,158,11,0.7));
+}
+.svg-chip.hover-boost.svg-danger rect {
+  filter: drop-shadow(0 0 12px rgba(239,68,68,0.7));
+}
+.svg-chip.hover-boost:not(.svg-green):not(.svg-warn):not(.svg-danger) rect {
+  stroke: var(--accent);
+  fill: rgba(108,142,245,0.08);
+  filter: drop-shadow(0 0 8px rgba(108,142,245,0.45));
+}
+.svg-chip.hover-boost text {
+  fill: #fff !important;
+}
+
+.card2.card-highlight {
+  border-color: var(--accent) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(108,142,245,0.18) !important;
+}
 </style>
 </head>
 <body>
@@ -1988,6 +2016,48 @@ function anim(){
   requestAnimationFrame(anim);
 }
 anim();
+
+// ─── INTERACTIVE MOCKUP & CARDS HOVER SYNC ──────────────
+function initHoverSync() {
+  const mappings = [
+    { card: 'bat-card', chip: 'mock-bat' },
+    { card: 'sto-card', chip: 'mock-sto' },
+    { card: 'ram-card', chip: 'mock-ram' },
+    { card: 'cpu-card', chip: 'mock-cpu' },
+    { card: 'dsp-card', chip: 'mock-dsp' },
+    { card: 'sns-card', chip: 'mock-sns' }
+  ];
+
+  mappings.forEach(({ card, chip }) => {
+    const cardEl = document.getElementById(card);
+    const chipEl = document.getElementById(chip);
+
+    if (cardEl && chipEl) {
+      // Hover card -> boost corresponding SVG chip on motherboard
+      cardEl.addEventListener('mouseenter', () => {
+        chipEl.classList.add('hover-boost');
+      });
+      cardEl.addEventListener('mouseleave', () => {
+        chipEl.classList.remove('hover-boost');
+      });
+
+      // Hover SVG chip -> highlight card on the right
+      chipEl.addEventListener('mouseenter', () => {
+        cardEl.classList.add('card-highlight');
+      });
+      chipEl.addEventListener('mouseleave', () => {
+        cardEl.classList.remove('card-highlight');
+      });
+    }
+  });
+}
+
+// Bind hover sync setup to run when DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initHoverSync);
+} else {
+  initHoverSync();
+}
 </script>
 </body>
 </html>
