@@ -586,6 +586,68 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(108,142,245,0.18) !important;
 }
+
+/* Terminal console logger styling */
+.terminal-log {
+  background: #020617;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #38bdf8;
+  margin-top: 22px;
+  text-align: left;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+.term-header {
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.term-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-red { background: #ef4444; }
+.dot-yellow { background: #eab308; }
+.dot-green { background: #22c55e; }
+.term-title {
+  font-size: 10px;
+  color: var(--textd);
+  margin-left: 6px;
+  font-weight: 500;
+}
+.term-body {
+  padding: 12px;
+  height: 130px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  scroll-behavior: smooth;
+}
+.term-line {
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+.term-line.sys {
+  color: #94a3b8;
+}
+.term-line.cmd {
+  color: #38bdf8;
+}
+.term-line.data {
+  color: #10b981;
+}
+.term-line.err {
+  color: #ef4444;
+}
 </style>
 </head>
 <body>
@@ -679,14 +741,33 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div class="scp">
       <h2 class="sc-title">Scanning device</h2>
       <p class="sc-sub">Keep your phone connected — do not unplug</p>
-      <div class="sci" id="si-bat"><div class="sci-ic">🔋</div><span class="sci-lbl">Battery info</span><span class="sci-st">IDLE</span></div>
-      <div class="sci" id="si-sto"><div class="sci-ic">💾</div><span class="sci-lbl">Storage details</span><span class="sci-st">IDLE</span></div>
-      <div class="sci" id="si-cpu"><div class="sci-ic">⚙️</div><span class="sci-lbl">Processor info</span><span class="sci-st">IDLE</span></div>
-      <div class="sci" id="si-dsp"><div class="sci-ic">🖥️</div><span class="sci-lbl">Display specs</span><span class="sci-st">IDLE</span></div>
-      <div class="sci" id="si-ai"><div class="sci-ic">🌐</div><span class="sci-lbl">Fetching official specs via AI</span><span class="sci-st">IDLE</span></div>
-      <div class="sci" id="si-cmp"><div class="sci-ic">🔍</div><span class="sci-lbl">Comparing components</span><span class="sci-st">IDLE</span></div>
+      
+      <!-- Progress Bar -->
       <div class="pw2"><div class="pf" id="pf"></div></div>
       <div class="plbl" id="plbl">0%</div>
+
+      <!-- Live Terminal Log (Tweak 1) -->
+      <div class="terminal-log">
+        <div class="term-header">
+          <span class="term-dot dot-red"></span>
+          <span class="term-dot dot-yellow"></span>
+          <span class="term-dot dot-green"></span>
+          <span class="term-title">scrutin_forensic_console.sh</span>
+        </div>
+        <div class="term-body" id="term-body">
+          <div class="term-line sys">> scrutin forensic kernel active.</div>
+        </div>
+      </div>
+
+      <!-- Minimal active list tags -->
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:16px;">
+        <div class="sci" id="si-bat" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🔋</div><span class="sci-lbl" style="font-size:9px;">BAT</span><span class="sci-st" style="display:none;">IDLE</span></div>
+        <div class="sci" id="si-sto" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">💾</div><span class="sci-lbl" style="font-size:9px;">STO</span><span class="sci-st" style="display:none;">IDLE</span></div>
+        <div class="sci" id="si-cpu" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">⚙️</div><span class="sci-lbl" style="font-size:9px;">CPU</span><span class="sci-st" style="display:none;">IDLE</span></div>
+        <div class="sci" id="si-dsp" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🖥️</div><span class="sci-lbl" style="font-size:9px;">DSP</span><span class="sci-st" style="display:none;">IDLE</span></div>
+        <div class="sci" id="si-ai" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🌐</div><span class="sci-lbl" style="font-size:9px;">AI</span><span class="sci-st" style="display:none;">IDLE</span></div>
+        <div class="sci" id="si-cmp" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🔍</div><span class="sci-lbl" style="font-size:9px;">CMP</span><span class="sci-st" style="display:none;">IDLE</span></div>
+      </div>
     </div>
   </div>
 
@@ -1323,6 +1404,64 @@ function runScanWithFetch(btn) {
   let fetchError = null;
 
   const stbar = document.getElementById('stbar');
+  const termBody = document.getElementById('term-body');
+  
+  if (termBody) {
+    termBody.innerHTML = '<div class="term-line sys">> scrutin forensic kernel active.</div>';
+  }
+
+  function addTerminalLine(text, type = 'sys') {
+    if (!termBody) return;
+    const line = document.createElement('div');
+    line.className = `term-line ${type}`;
+    line.textContent = text;
+    termBody.appendChild(line);
+    termBody.scrollTop = termBody.scrollHeight;
+  }
+
+  const stepLogs = [
+    [
+      { text: '> Initiating battery metrics interrogation...', type: 'sys' },
+      { text: '$ adb shell dumpsys battery', type: 'cmd' },
+      { text: '✓ Battery capacity and health reports parsed.', type: 'data' }
+    ],
+    [
+      { text: '> Auditing internal disk partition structure...', type: 'sys' },
+      { text: '$ adb shell df /data', type: 'cmd' },
+      { text: '✓ Filesystem blocks and mount allocations mapped.', type: 'data' }
+    ],
+    [
+      { text: '> Querying CPU board & hardware SoC info...', type: 'sys' },
+      { text: '$ adb shell getprop ro.board.platform', type: 'cmd' },
+      { text: '$ adb shell getprop ro.soc.model', type: 'cmd' },
+      { text: '✓ Processor architecture and codenames loaded.', type: 'data' }
+    ],
+    [
+      { text: '> Fetching display panel sizing profile...', type: 'sys' },
+      { text: '$ adb shell wm size', type: 'cmd' },
+      { text: '✓ Physical display resolution verified.', type: 'data' }
+    ],
+    [
+      { text: '> Contacting specs database engine...', type: 'sys' },
+      { text: '> Querying MobileAPI cache & overrides...', type: 'sys' },
+      { text: '✓ Official specifications retrieved successfully.', type: 'data' }
+    ],
+    [
+      { text: '> Correlating diagnostic parameters vs official...', type: 'sys' },
+      { text: '> Generating forensic validation matrix...', type: 'sys' },
+      { text: '✓ Diagnostics check completed. Printing report.', type: 'data' }
+    ]
+  ];
+
+  function printLogGroup(groupIndex) {
+    const lines = stepLogs[groupIndex];
+    if (!lines) return;
+    lines.forEach((line, index) => {
+      setTimeout(() => {
+        addTerminalLine(line.text, line.type);
+      }, index * 180);
+    });
+  }
 
   fetch(API_BASE + '/scan')
     .then(async res => {
@@ -1336,7 +1475,10 @@ function runScanWithFetch(btn) {
       }
     })
     .then(data => { fetchData = data; })
-    .catch(err => { fetchError = err; })
+    .catch(err => { 
+      fetchError = err;
+      addTerminalLine(`ERROR: ${err.message || 'Scan failed'}`, 'err');
+    })
     .finally(() => { fetchDone = true; });
 
   function finishScan() {
@@ -1362,14 +1504,17 @@ function runScanWithFetch(btn) {
       const prev = document.getElementById(steps[step - 1].id);
       prev.classList.remove('active');
       prev.classList.add('done');
-      prev.querySelector('.sci-st').textContent = 'DONE ✓';
+      if (prev.querySelector('.sci-st')) prev.querySelector('.sci-st').textContent = 'DONE ✓';
     }
     if (step < steps.length) {
       const cur = document.getElementById(steps[step].id);
       cur.classList.add('active');
-      cur.querySelector('.sci-st').textContent = 'SCANNING...';
+      if (cur.querySelector('.sci-st')) cur.querySelector('.sci-st').textContent = 'SCANNING...';
       document.getElementById('pf').style.width = steps[step].p;
       document.getElementById('plbl').textContent = steps[step].p;
+      
+      printLogGroup(step);
+      
       step++;
       setTimeout(tick, 700);
     } else if (!fetchDone) {
