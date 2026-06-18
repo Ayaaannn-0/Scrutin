@@ -139,6 +139,59 @@ CHIPSET_MARKETING_MAP = {
 
 MODEL_COMMERCIAL_MAP = {
     "rmx5313": "C71",
+    
+    # Samsung Galaxy S24
+    "sm-s921b": "Galaxy S24",
+    "sm-s921u": "Galaxy S24",
+    "sm-s921w": "Galaxy S24",
+    "sm-s921n": "Galaxy S24",
+    "sm-s9210": "Galaxy S24",
+    
+    # Samsung Galaxy S24 Ultra
+    "sm-s928b": "Galaxy S24 Ultra",
+    "sm-s928u": "Galaxy S24 Ultra",
+    "sm-s928w": "Galaxy S24 Ultra",
+    "sm-s928n": "Galaxy S24 Ultra",
+    "sm-s9280": "Galaxy S24 Ultra",
+    
+    # Samsung Galaxy S23
+    "sm-s911b": "Galaxy S23",
+    "sm-s911u": "Galaxy S23",
+    "sm-s911w": "Galaxy S23",
+    "sm-s911n": "Galaxy S23",
+    "sm-s9110": "Galaxy S23",
+    
+    # Samsung Galaxy S23 Ultra
+    "sm-s918b": "Galaxy S23 Ultra",
+    "sm-s918u": "Galaxy S23 Ultra",
+    "sm-s918w": "Galaxy S23 Ultra",
+    "sm-s918n": "Galaxy S23 Ultra",
+    "sm-s9180": "Galaxy S23 Ultra",
+    
+    # Google Pixel 8
+    "gkws6": "Pixel 8",
+    "g9bqd": "Pixel 8",
+    "gpj41": "Pixel 8",
+    "gzpf0": "Pixel 8",
+    
+    # Google Pixel 8 Pro
+    "gc3ve": "Pixel 8 Pro",
+    "g1sme": "Pixel 8 Pro",
+    
+    # Google Pixel 7
+    "gvu6c": "Pixel 7",
+    "gqo0o": "Pixel 7",
+    
+    # OnePlus 12
+    "cph2573": "OnePlus 12",
+    "cph2581": "OnePlus 12",
+    "pjd110": "OnePlus 12",
+    
+    # OnePlus 11
+    "cph2447": "OnePlus 11",
+    "cph2449": "OnePlus 11",
+    "cph2451": "OnePlus 11",
+    "pbh110": "OnePlus 11",
 }
 
 DEVICE_SPECS_OVERRIDE = {
@@ -157,8 +210,143 @@ DEVICE_SPECS_OVERRIDE = {
         "ram": "4 GB",
         "storage": "64 GB",
         "overhead": 0.35
+    },
+    
+    # Samsung Galaxy S24
+    "samsung_galaxy_s24": {
+        "battery": "4000 mAh",
+        "chipset": "Exynos 2400 / Snapdragon 8 Gen 3",
+        "display": "1080x2340",
+        "ram": "8 GB",
+        "storage": "128 GB / 256 GB / 512 GB",
+        "overhead": 0.15
+    },
+    # Samsung Galaxy S24 Ultra
+    "samsung_galaxy_s24_ultra": {
+        "battery": "5000 mAh",
+        "chipset": "Snapdragon 8 Gen 3",
+        "display": "1440x3120",
+        "ram": "12 GB",
+        "storage": "256 GB / 512 GB / 1024 GB",
+        "overhead": 0.15
+    },
+    # Samsung Galaxy S23
+    "samsung_galaxy_s23": {
+        "battery": "3900 mAh",
+        "chipset": "Snapdragon 8 Gen 2",
+        "display": "1080x2340",
+        "ram": "8 GB",
+        "storage": "128 GB / 256 GB / 512 GB",
+        "overhead": 0.15
+    },
+    # Samsung Galaxy S23 Ultra
+    "samsung_galaxy_s23_ultra": {
+        "battery": "5000 mAh",
+        "chipset": "Snapdragon 8 Gen 2",
+        "display": "1440x3088",
+        "ram": "8 GB / 12 GB",
+        "storage": "256 GB / 512 GB / 1024 GB",
+        "overhead": 0.15
+    },
+    
+    # Google Pixel 8
+    "google_pixel_8": {
+        "battery": "4575 mAh",
+        "chipset": "Google Tensor G3",
+        "display": "1080x2400",
+        "ram": "8 GB",
+        "storage": "128 GB / 256 GB",
+        "overhead": 0.15
+    },
+    # Google Pixel 8 Pro
+    "google_pixel_8_pro": {
+        "battery": "5050 mAh",
+        "chipset": "Google Tensor G3",
+        "display": "1344x2992",
+        "ram": "12 GB",
+        "storage": "128 GB / 256 GB / 512 GB / 1024 GB",
+        "overhead": 0.15
+    },
+    # Google Pixel 7
+    "google_pixel_7": {
+        "battery": "4355 mAh",
+        "chipset": "Google Tensor G2",
+        "display": "1080x2400",
+        "ram": "8 GB",
+        "storage": "128 GB / 256 GB",
+        "overhead": 0.15
+    },
+    
+    # OnePlus 12
+    "oneplus_oneplus_12": {
+        "battery": "5400 mAh",
+        "chipset": "Snapdragon 8 Gen 3",
+        "display": "1440x3168",
+        "ram": "12 GB / 16 GB / 24 GB",
+        "storage": "256 GB / 512 GB / 1024 GB",
+        "overhead": 0.15
+    },
+    # OnePlus 11
+    "oneplus_oneplus_11": {
+        "battery": "5000 mAh",
+        "chipset": "Snapdragon 8 Gen 2",
+        "display": "1440x3216",
+        "ram": "8 GB / 12 GB / 16 GB",
+        "storage": "128 GB / 256 GB / 512 GB",
+        "overhead": 0.15
     }
 }
+
+# Automatically duplicate overrides for raw model numbers to guarantee matching
+_raw_model_mappings = {
+    "samsung_sm-s921b": "samsung_galaxy_s24",
+    "samsung_sm-s921u": "samsung_galaxy_s24",
+    "samsung_sm-s921w": "samsung_galaxy_s24",
+    "samsung_sm-s921n": "samsung_galaxy_s24",
+    "samsung_sm-s9210": "samsung_galaxy_s24",
+    
+    "samsung_sm-s928b": "samsung_galaxy_s24_ultra",
+    "samsung_sm-s928u": "samsung_galaxy_s24_ultra",
+    "samsung_sm-s928w": "samsung_galaxy_s24_ultra",
+    "samsung_sm-s928n": "samsung_galaxy_s24_ultra",
+    "samsung_sm-s9280": "samsung_galaxy_s24_ultra",
+    
+    "samsung_sm-s911b": "samsung_galaxy_s23",
+    "samsung_sm-s911u": "samsung_galaxy_s23",
+    "samsung_sm-s911w": "samsung_galaxy_s23",
+    "samsung_sm-s911n": "samsung_galaxy_s23",
+    "samsung_sm-s9110": "samsung_galaxy_s23",
+    
+    "samsung_sm-s918b": "samsung_galaxy_s23_ultra",
+    "samsung_sm-s918u": "samsung_galaxy_s23_ultra",
+    "samsung_sm-s918w": "samsung_galaxy_s23_ultra",
+    "samsung_sm-s918n": "samsung_galaxy_s23_ultra",
+    "samsung_sm-s9180": "samsung_galaxy_s23_ultra",
+    
+    "google_gkws6": "google_pixel_8",
+    "google_g9bqd": "google_pixel_8",
+    "google_gpj41": "google_pixel_8",
+    "google_gzpf0": "google_pixel_8",
+    
+    "google_gc3ve": "google_pixel_8_pro",
+    "google_g1sme": "google_pixel_8_pro",
+    
+    "google_gvu6c": "google_pixel_7",
+    "google_gqo0o": "google_pixel_7",
+    
+    "oneplus_cph2573": "oneplus_oneplus_12",
+    "oneplus_cph2581": "oneplus_oneplus_12",
+    "oneplus_pjd110": "oneplus_oneplus_12",
+    
+    "oneplus_cph2447": "oneplus_oneplus_11",
+    "oneplus_cph2449": "oneplus_oneplus_11",
+    "oneplus_cph2451": "oneplus_oneplus_11",
+    "oneplus_pbh110": "oneplus_oneplus_11",
+}
+
+for raw_key, target_key in _raw_model_mappings.items():
+    if target_key in DEVICE_SPECS_OVERRIDE:
+        DEVICE_SPECS_OVERRIDE[raw_key] = DEVICE_SPECS_OVERRIDE[target_key]
 
 
 def _featherless_client():
