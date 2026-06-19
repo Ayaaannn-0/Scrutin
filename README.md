@@ -12,7 +12,7 @@ Every day millions of people get cheated at repair shops with fake or cheap repl
 
 ## The Solution
 
-Scrutin scans your phone's hardware via ADB, fetches official specs (Featherless AI with MobileAPI fallback), compares them with AI-assisted validation, and flags anything suspicious — in plain language anyone can understand.
+Scrutin scans your phone's hardware via ADB, fetches official specs (Featherless AI with MobileAPI as fallback), compares them with AI-assisted validation, and flags anything suspicious — in plain language anyone can understand.
 
 ## Features
 
@@ -66,8 +66,5 @@ python scanner.py
 
 ## Project Status
 
-Active development — v0.1 prototype
+Active development — v0.2 prototype
 
-## Built By
-
-Ayaan
