@@ -1,0 +1,122 @@
+================================================================================
+                    SCRUTIN: FORENSIC HARDWARE INTEGRITY PLATFORM
+             Hackathon Architecture, Workflow & Backend Guide for Team
+================================================================================
+
+1. WHAT IS SCRUTIN? (THE VALUE PROPOSITION)
+--------------------------------------------------------------------------------
+Most phone-diagnostic apps (like Antutu or CPU-Z) are "read-only" status screens. 
+They ask the Android Operating System for details, which can be easily spoofed 
+by malicious vendors installing custom ROMs or editing the system config files. 
+
+Scrutin is a hardware forensics and fraud-detection tool. It checks whether 
+components (like screens, storage chips, or batteries) have been swapped out 
+for cheap, unverified, or mismatched replacement parts. It does this by:
+  - Bypassing software spoofing using raw ADB commands.
+  - Running active performance benchmarks (refresh rate scans, storage write tests).
+  - Comparing active data with official specifications using AI (Featherless API).
+  - Offering a "Before & After Repair Audit" to keep repair shops honest.
+
+--------------------------------------------------------------------------------
+2. STEP-BY-STEP WORKFLOW (HOW IT WORKS IN ACTION)
+--------------------------------------------------------------------------------
+[Step 1: Connection & Handshake]
+  - The phone is connected to a computer via USB with "USB Debugging" enabled.
+  - The Scrutin backend connects to the device using ADB (Android Debug Bridge).
+
+[Step 2: Scrawling Raw Hardware Signatures]
+  - The backend runs a series of ADB shell commands directly targeting the kernel, 
+    display management service, battery registers, and the sensor hub:
+    * Display: Runs `wm size` (resolution) and `dumpsys display` (panel refresh rate).
+    * Storage: Runs `df /data` (capacity) and executes a timed 20MB file write 
+      speed test (`dd` command to `/data/local/tmp/speedtest`) to measure write speeds.
+    * Battery: Queries `dumpsys battery` to extract charge capacity and cycle count.
+    * Sensors: Queries `dumpsys sensorservice` to read the exact driver name and 
+      chip vendor (e.g. Bosch, STMicroelectronics) for every physical sensor.
+
+[Step 3: Marketing Name & Specs Resolution]
+  - Phones often report internal codenames (like "ums9230" for Unisoc or "rmx5313" 
+    for Realme C71) or regulatory model codes (like "M2003J15SC" for Redmi Note 9).
+  - Scrutin maps these codes using a local translation dictionary or sends it to
+    the Featherless AI engine (Qwen 72B) with instructions to:
+    1. Map internal codes to their commercial marketing name.
+    2. Retrieve standard retail specifications (expected resolution, refresh rate, 
+       storage speed, and storage standard like UFS 4.0).
+
+[Step 4: Comparison & Anomaly Engine]
+  - Scrutin compares the scanned stats with the official specs:
+    * Counterfeit Screen Swaps: If the official specs say the phone requires a 
+      90Hz or 120Hz display, but the active panel only runs at 60Hz, it flags a warning.
+    * Counterfeit Storage Swaps: If the spec specifies UFS memory, but the write 
+      speed benchmark drops below 120 MB/s (typical of cheap eMMC replacements), 
+      it flags a speed anomaly.
+    * Unverified Status: If specifications are completely unavailable, the phone 
+      degrades gracefully to "unverified" rather than failing.
+
+[Step 5: Before / After Repair Audit]
+  - If a user sends a phone to a repair shop, they scan it "Before" and save a 
+    snapshot. After they receive it back, they run an "After" scan.
+  - Even if the shop replaces a screen or battery with components that match the 
+    original specifications (same capacity/resolution), Scrutin catches the swap by 
+    comparing:
+    * The physical sensors suite: If the screen was replaced, the sensor chips 
+      embedded in the display assembly (ambient light/proximity) will change 
+      vendors, drivers, or go missing entirely.
+    * Battery cycle counts: A swapped battery will show a reset/dropped cycle count.
+
+--------------------------------------------------------------------------------
+3. BACKEND ARCHITECTURE (THE PYTHON CODE)
+--------------------------------------------------------------------------------
+Scrutin's backend is a Python Flask server organized into three primary files:
+
+A. app.py (The Controller & API Routing)
+  - Spawns the Flask web server.
+  - Implements the `/scan_stream` endpoint. Instead of loading the page in one 
+    block, it uses SSE (Server-Sent Events) to stream the raw ADB commands and 
+    diagnostics live to a console logger on the screen, creating a high-tech 
+    forensic feel during the scan.
+
+B. adb_utils.py (The ADB Shell Wrapper & Parsers)
+  - Connects to ADB processes.
+  - Bypasses user-space restrictions.
+  - Timing-based Benchmark: Runs the `dd` command to write a 20MB zero file, uses 
+    Python's `time.time()` to measure the exact duration, calculates the write 
+    throughput in MB/s, and cleans up the temporary benchmark files.
+
+C. specs.py (The Validation Logic & AI Engine)
+  - Holds `DEVICE_SPECS_OVERRIDE` mappings for standard flagships.
+  - Connects to Featherless AI. The custom prompt maps obscure model codes to 
+    commercial brands.
+  - Executes comparison validation: runs tolerance checks (e.g. allowing up to 
+    25% storage capacity partitions variance) and flags hardware discrepancies.
+
+--------------------------------------------------------------------------------
+4. FRONTEND ARCHITECTURE (THE WEB UI)
+--------------------------------------------------------------------------------
+The UI is a single, heavily styled file (templates/scrutin2.html):
+  - Theme: Sleek, high-contrast dark mode using glassmorphic styling (blurs and 
+    subtle border glows) to look premium.
+  - Motherboard Interface: Displays a custom glowing SVG motherboard. Hovering 
+    over display, chipset, battery, or storage chips dynamically pops up 
+    tooltip cards showing scanned stats and verification verdicts.
+  - Dynamic Grid Cards: Clicking on "Sensors Audit" opens a detailed grid. It 
+    groups all phone sensors into logical categories (Motion, Position, 
+    Environment, Biometrics) with custom icons, vendor badges, and green pulsing 
+    "Active" dots indicating live hardware signals.
+  - Before/After Comparison Grid: Uses local storage to cache the "Before" scan 
+    and highlights differences in red.
+
+--------------------------------------------------------------------------------
+5. HACKATHON PITCH SHEET (HOW TO PRESENT THIS TO THE JUDGES)
+--------------------------------------------------------------------------------
+- The Story: "Every day, used phone buyers and repair customers get scammed. They 
+  pay for premium hardware but walk away with cheap 60Hz copycat displays or slow 
+  cloned storage. Current diagnostics apps can be fooled by software spoofs."
+- The Solution: "Scrutin is a digital notary for hardware. It bypasses software 
+  spoofs, runs live performance benchmarks over ADB, queries AI to fetch official 
+  specs, and runs an integrity audit. Our Before/After tool guarantees that no 
+  technician swaps out your parts during a repair."
+- Technical Highlight: Explain that we don't just query database fields—we 
+  verify hardware signals (sensor driver configurations) and physical performance 
+  (active I/O disk timing benchmarks).
+================================================================================

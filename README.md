@@ -8,7 +8,7 @@ No trust — only data.
 
 ## The Problem
 
-Every day millions of people get cheated at repair shops with cheap replacement or non-original components. There's no way for a normal person to verify if the parts used are genuine.
+Every day millions of people get cheated at repair shops with cheap or mismatched replacement components. There's no way for a normal person to verify if the parts used match the specifications.
 
 ## The Solution
 

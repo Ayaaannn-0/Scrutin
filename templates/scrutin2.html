@@ -1115,7 +1115,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           
           <!-- Mockup status legend -->
           <div class="mockup-legend">
-            <span class="lg-item"><span class="lg-dot dot-ok"></span> Genuine</span>
+            <span class="lg-item"><span class="lg-dot dot-ok"></span> Verified</span>
             <span class="lg-item"><span class="lg-dot dot-warn"></span> Unverified</span>
             <span class="lg-item"><span class="lg-dot dot-err"></span> Mismatch</span>
           </div>
@@ -1296,7 +1296,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
     <div class="dh">
       <div class="dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">⚙️</div>
-      <div><div class="dtitle">Processor</div><div class="dstatus" id="cpu-dstatus" style="color:var(--ok);">✓ Genuine — matches official spec</div></div>
+      <div><div class="dtitle">Processor</div><div class="dstatus" id="cpu-dstatus" style="color:var(--ok);">✓ Verified — matches official spec</div></div>
     </div>
     <div class="dg">
       <div class="dg-lbl">Component Analysis</div>
@@ -1327,7 +1327,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
     <div class="dh">
       <div class="dbi" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);">🖥️</div>
-      <div><div class="dtitle">Display</div><div class="dstatus" id="dsp-dstatus" style="color:var(--ok);">✓ Genuine — matches official spec</div></div>
+      <div><div class="dtitle">Display</div><div class="dstatus" id="dsp-dstatus" style="color:var(--ok);">✓ Verified — matches official spec</div></div>
     </div>
     <div class="dg">
       <div class="dg-lbl">Component Analysis</div>
@@ -1836,7 +1836,7 @@ function populateResults(d) {
   } else if (dangerCount > 0 || warnCount > 0) {
     summaryEl.textContent = '⚠ ' + (dangerCount + warnCount) + ' component(s) need attention. Check details below.';
   } else {
-    summaryEl.textContent = '✓ All components look genuine. No suspicious activity detected.';
+    summaryEl.textContent = '✓ All components verified. No anomalies detected.';
     summaryEl.style.background = 'rgba(16,185,129,0.06)';
     summaryEl.style.borderColor = 'rgba(16,185,129,0.18)';
     summaryEl.style.color = 'rgba(16,185,129,0.9)';
@@ -1875,7 +1875,7 @@ function setCard(cardId, pillId, crId, comp) {
   if (cardId === 'bat-card' && comp.flag === 'ok') {
     pill.textContent = 'HEALTHY';
   } else {
-    pill.textContent = comp.flag==='ok' ? 'GENUINE' : comp.flag==='warn' ? 'CHECK' : 'FLAGGED';
+    pill.textContent = comp.flag==='ok' ? 'VERIFIED' : comp.flag==='warn' ? 'CHECK' : 'FLAGGED';
   }
   cr.textContent   = (comp.message || '') + ' · tap for details';
 }
@@ -2470,7 +2470,7 @@ function exportReportPDF() {
   Object.keys(labels).forEach(key => {
     const c = comps[key];
     if (!c) return;
-    const verdict = c.flag === 'ok' ? 'GENUINE' : c.flag === 'warn' ? 'CHECK' : 'FLAGGED';
+    const verdict = c.flag === 'ok' ? 'VERIFIED' : c.flag === 'warn' ? 'CHECK' : 'FLAGGED';
     addLine(labels[key] + ' — ' + verdict, 11, true);
     addLine(c.message || '', 10);
     addGap(0.5);
