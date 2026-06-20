@@ -16,6 +16,8 @@ NA_SPECS = {
     "display": "N/A",
     "ram": "N/A",
     "storage": "N/A",
+    "refresh_rate": "N/A",
+    "storage_type": "N/A",
     "overhead": 0.25,
     "source": "none",
 }
@@ -201,6 +203,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "720x1600",
         "ram": "4 GB",
         "storage": "64 GB",
+        "refresh_rate": "90 Hz",
+        "storage_type": "UFS 2.2",
         "overhead": 0.35
     },
     "realme_rmx5313": {
@@ -209,6 +213,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "720x1600",
         "ram": "4 GB",
         "storage": "64 GB",
+        "refresh_rate": "90 Hz",
+        "storage_type": "UFS 2.2",
         "overhead": 0.35
     },
     
@@ -219,6 +225,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1080x2340",
         "ram": "8 GB",
         "storage": "128 GB / 256 GB / 512 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 4.0",
         "overhead": 0.15
     },
     # Samsung Galaxy S24 Ultra
@@ -228,6 +236,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1440x3120",
         "ram": "12 GB",
         "storage": "256 GB / 512 GB / 1024 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 4.0",
         "overhead": 0.15
     },
     # Samsung Galaxy S23
@@ -237,6 +247,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1080x2340",
         "ram": "8 GB",
         "storage": "128 GB / 256 GB / 512 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 4.0",
         "overhead": 0.15
     },
     # Samsung Galaxy S23 Ultra
@@ -246,6 +258,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1440x3088",
         "ram": "8 GB / 12 GB",
         "storage": "256 GB / 512 GB / 1024 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 4.0",
         "overhead": 0.15
     },
     
@@ -256,6 +270,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1080x2400",
         "ram": "8 GB",
         "storage": "128 GB / 256 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 3.1",
         "overhead": 0.15
     },
     # Google Pixel 8 Pro
@@ -265,6 +281,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1344x2992",
         "ram": "12 GB",
         "storage": "128 GB / 256 GB / 512 GB / 1024 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 3.1",
         "overhead": 0.15
     },
     # Google Pixel 7
@@ -274,6 +292,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1080x2400",
         "ram": "8 GB",
         "storage": "128 GB / 256 GB",
+        "refresh_rate": "90 Hz",
+        "storage_type": "UFS 3.1",
         "overhead": 0.15
     },
     
@@ -284,6 +304,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1440x3168",
         "ram": "12 GB / 16 GB / 24 GB",
         "storage": "256 GB / 512 GB / 1024 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 4.0",
         "overhead": 0.15
     },
     # OnePlus 11
@@ -293,6 +315,8 @@ DEVICE_SPECS_OVERRIDE = {
         "display": "1440x3216",
         "ram": "8 GB / 12 GB / 16 GB",
         "storage": "128 GB / 256 GB / 512 GB",
+        "refresh_rate": "120 Hz",
+        "storage_type": "UFS 4.0",
         "overhead": 0.15
     }
 }
@@ -397,14 +421,14 @@ def _fetch_specs_featherless(brand, model, scanned_ram, scanned_storage, codenam
     client = _featherless_client()
     codename_str = f" (internal codename: {codename})" if codename else ""
 
-    prompt = f"""You are an expert mobile hardware verification engine. Provide ONLY verified official retail specs.
+    prompt = f"""You are an expert mobile hardware verification engine. Provide official retail specs.
 
 Device: {brand} {model}{codename_str}
 Scanned: {scanned_ram or "Unknown"} RAM, {scanned_storage or "Unknown"} storage.
 
 CRITICAL RULES — FOLLOW EXACTLY:
-1. Return ONLY specs you are 100% certain are correct for THIS EXACT device.
-2. If you are not sure about ANY field, set its value to "N/A". NEVER GUESS.
+1. If the model is an internal regulatory code or number (e.g. M2003J15SC, V2025, V2207, etc.), translate it to its commercial marketing name (e.g. Redmi Note 9, Vivo Y20, Vivo Y35, etc.) and return the standard retail specifications for that commercial model.
+2. Provide your best verified specifications for this device model. Do not return "N/A" unless you are completely unable to identify the device.
 3. DO NOT copy the example values below. They are schema examples only.
 4. Map codenames to commercial labels (e.g. ums9230 -> Unisoc T612, parrot -> Snapdragon 6 Gen 1).
 5. Normalize storage to standard retail tiers (64 GB, 128 GB, etc.).
@@ -421,6 +445,8 @@ Schema (EXAMPLE ONLY — do NOT copy these values):
   "display": "RESOLUTION_WIDTHxHEIGHT (e.g., 1080x2400)",
   "ram": "RAM_SIZE (e.g., 8 GB)",
   "storage": "STORAGE_SIZE (e.g., 128 GB)",
+  "refresh_rate": "PANEL_REFRESH_RATE (e.g., 120 Hz)",
+  "storage_type": "STORAGE_SPECIFICATION (e.g., UFS 4.0)",
   "overhead": 0.25
 }}"""
 
@@ -728,11 +754,54 @@ def compare_device(scanned, official, device_info=None):
             "battery": _compare_battery(scanned.get("battery_level"), scanned.get("battery_health")),
         }
 
+    # 1. Display Comparison (with Refresh Rate Check)
+    disp_comp = _compare_local(scanned.get("display"), official.get("display"), 0.1)
+    scanned_hz = scanned.get("refresh_rate")
+    official_hz = official.get("refresh_rate")
+    if scanned_hz and official_hz and official_hz != "N/A" and scanned_hz != "N/A":
+        try:
+            s_hz = int(re.search(r"\d+", str(scanned_hz)).group()) if re.search(r"\d+", str(scanned_hz)) else 60
+            o_hz = int(re.search(r"\d+", str(official_hz)).group()) if re.search(r"\d+", str(official_hz)) else 60
+            if o_hz > 60 and s_hz <= 60:
+                disp_comp = {
+                    "status": "suspicious",
+                    "flag": "danger",
+                    "message": f"Counterfeit screen warning: Panel runs at {s_hz}Hz (Official requires {o_hz}Hz)"
+                }
+            elif disp_comp["flag"] == "ok":
+                disp_comp["message"] = f"Match found ({s_hz} Hz)"
+        except Exception:
+            pass
+
+    # 2. RAM Comparison
+    ram_comp = _compare_local(scanned.get("ram"), official.get("ram"), 0.2)
+
+    # 3. Storage Comparison (with speed benchmark check)
     overhead = float(official.get("overhead", 0.25))
+    sto_comp = _compare_local(scanned.get("storage"), official.get("storage"), overhead)
+    speed = scanned.get("storage_speed_mbs", 0)
+    type_spec = str(official.get("storage_type", "")).lower()
+    
+    if speed > 0:
+        if "ufs" in type_spec and speed < 120.0:
+            sto_comp = {
+                "status": "suspicious",
+                "flag": "danger",
+                "message": f"Speed anomaly: Write speed {speed} MB/s is too slow for UFS memory (possible cheap clone)"
+            }
+        elif sto_comp["flag"] == "ok":
+            sto_comp["message"] = f"Match found ({speed} MB/s)"
+
+    # 4. Chipset Comparison
+    chip_comp = _compare_chipset(scanned.get("chipset"), official.get("chipset"))
+
+    # 5. Battery Comparison
+    bat_comp = _compare_battery(scanned.get("battery_level"), scanned.get("battery_health"))
+
     return {
-        "display": _compare_local(scanned.get("display"), official.get("display"), 0.1),
-        "ram": _compare_local(scanned.get("ram"), official.get("ram"), 0.2),
-        "storage": _compare_local(scanned.get("storage"), official.get("storage"), overhead),
-        "chipset": _compare_chipset(scanned.get("chipset"), official.get("chipset")),
-        "battery": _compare_battery(scanned.get("battery_level"), scanned.get("battery_health")),
+        "display": disp_comp,
+        "ram": ram_comp,
+        "storage": sto_comp,
+        "chipset": chip_comp,
+        "battery": bat_comp,
     }

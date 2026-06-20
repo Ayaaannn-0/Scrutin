@@ -587,6 +587,224 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   box-shadow: 0 8px 24px rgba(108,142,245,0.18) !important;
 }
 
+/* Floating Motherboard SVG Tooltip */
+.svg-tooltip {
+  position: absolute;
+  background: rgba(13, 17, 32, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-family: var(--font);
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate(-50%, -100%) scale(0.92);
+  opacity: 0;
+  white-space: nowrap;
+}
+.svg-tooltip.show {
+  opacity: 1;
+  transform: translate(-50%, -100%) scale(1);
+}
+.tooltip-title {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--textd);
+  margin-bottom: 3px;
+}
+.tooltip-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.tooltip-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--textm);
+}
+.tooltip-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.tooltip-status-dot.ok {
+  background: var(--ok);
+  box-shadow: 0 0 8px var(--ok);
+}
+.tooltip-status-dot.warn {
+  background: var(--warn);
+  box-shadow: 0 0 8px var(--warn);
+}
+.tooltip-status-dot.danger {
+  background: var(--danger);
+  box-shadow: 0 0 8px var(--danger);
+}
+
+/* Sensor Grid & Card styling */
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+  width: 100%;
+}
+.sensor-item-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  position: relative;
+  overflow: hidden;
+}
+.sensor-item-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+.sensor-item-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--sensor-accent, var(--accent));
+  opacity: 0;
+  transition: opacity 0.22s ease;
+}
+.sensor-item-card:hover::before {
+  opacity: 0.8;
+}
+.sensor-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--sensor-bg, rgba(108, 142, 245, 0.08));
+  border: 1px solid var(--sensor-border, rgba(108, 142, 245, 0.18));
+  color: var(--sensor-accent, var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.sensor-item-details {
+  flex: 1;
+  min-width: 0;
+}
+.sensor-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 3px;
+}
+.sensor-item-type {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.sensor-item-name {
+  font-size: 11px;
+  color: var(--textm);
+  margin-bottom: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sensor-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+.sensor-item-vendor {
+  font-size: 9px;
+  font-family: var(--mono);
+  color: var(--accent);
+  background: rgba(108, 142, 245, 0.08);
+  border: 1px solid rgba(108, 142, 245, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  max-width: 65%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: -0.2px;
+}
+.sensor-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: var(--ok);
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-family: var(--font);
+}
+.sensor-pulse {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--ok);
+  display: inline-block;
+  box-shadow: 0 0 6px var(--ok);
+  animation: sensor-pulse-anim 1.5s infinite;
+}
+@keyframes sensor-pulse-anim {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+.sensor-tab-btn {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--textd);
+}
+.sensor-tab-btn:hover {
+  border-color: var(--border2);
+  color: var(--text);
+  background: var(--bg2);
+}
+.sensor-tab-btn.active {
+  background: rgba(108, 142, 245, 0.12) !important;
+  color: var(--accent) !important;
+  border-color: rgba(108, 142, 245, 0.3) !important;
+  box-shadow: 0 0 10px rgba(108, 142, 245, 0.1);
+}
+
 /* Terminal console logger styling */
 .terminal-log {
   background: #020617;
@@ -642,8 +860,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .term-line.cmd {
   color: #38bdf8;
 }
-.term-line.data {
+.term-line.data, .term-line.success {
   color: #10b981;
+}
+.term-line.stdout {
+  color: #e2e8f0;
 }
 .term-line.err {
   color: #ef4444;
@@ -674,7 +895,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="hero-card-icon">🔍</div>
         <div class="hero-card-text">
           <h2>Scan My Phone</h2>
-          <p>Detect fake or replaced components after a repair. Full fraud detection.</p>
+          <p>Detect suspicious or replaced components after a repair. Full integrity audit.</p>
         </div>
         <div class="hero-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
@@ -758,16 +979,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <div class="term-line sys">> scrutin forensic kernel active.</div>
         </div>
       </div>
-
-      <!-- Minimal active list tags -->
-      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:16px;">
-        <div class="sci" id="si-bat" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🔋</div><span class="sci-lbl" style="font-size:9px;">BAT</span><span class="sci-st" style="display:none;">IDLE</span></div>
-        <div class="sci" id="si-sto" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">💾</div><span class="sci-lbl" style="font-size:9px;">STO</span><span class="sci-st" style="display:none;">IDLE</span></div>
-        <div class="sci" id="si-cpu" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">⚙️</div><span class="sci-lbl" style="font-size:9px;">CPU</span><span class="sci-st" style="display:none;">IDLE</span></div>
-        <div class="sci" id="si-dsp" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🖥️</div><span class="sci-lbl" style="font-size:9px;">DSP</span><span class="sci-st" style="display:none;">IDLE</span></div>
-        <div class="sci" id="si-ai" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🌐</div><span class="sci-lbl" style="font-size:9px;">AI</span><span class="sci-st" style="display:none;">IDLE</span></div>
-        <div class="sci" id="si-cmp" style="flex:1; min-width:80px; padding:6px; border-radius:6px; font-size:11px; margin-bottom:0;"><div class="sci-ic" style="font-size:12px; margin-bottom:2px;">🔍</div><span class="sci-lbl" style="font-size:9px;">CMP</span><span class="sci-st" style="display:none;">IDLE</span></div>
-      </div>
     </div>
   </div>
 
@@ -783,7 +994,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div class="results-layout">
       <!-- Left Column: Interactive Phone Motherboard Vector -->
       <div class="mockup-side">
-        <div class="mockup-sticky" style="display:flex; flex-direction:column; align-items:center;">
+        <div class="mockup-sticky" style="display:flex; flex-direction:column; align-items:center; position:relative;">
+          <!-- Floating glassmorphism tooltip -->
+          <div id="svg-tooltip" class="svg-tooltip"></div>
           <div class="phone-mockup">
             <svg viewBox="0 0 160 330" width="160" height="330" style="display: block;">
               <!-- Background static bus tracks -->
@@ -1105,7 +1318,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div class="action-card act-minor">
       <div class="act-label">✓ No Action Needed</div>
       <div class="act-title">Processor looks original</div>
-      <div class="act-body">Your processor matches manufacturer records. This is one of the hardest components to fake. <strong>No action required.</strong></div>
+      <div class="act-body">Your processor matches manufacturer records. This is one of the hardest components to modify or swap. <strong>No action required.</strong></div>
     </div>
     <button class="btn-p" onclick="go('results')">← Back to Report</button>
   </div>
@@ -1137,17 +1350,51 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
   <div class="screen ds" id="det-sns">
     <button class="nav-bk" onclick="go('results')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back to Results</button>
-    <div class="dh">
+    <div class="dh" style="margin-bottom: 15px;">
       <div class="dbi" style="background:rgba(108,142,245,0.1);border:1px solid rgba(108,142,245,0.2);">🧭</div>
       <div><div class="dtitle">Sensors Audit</div><div class="dstatus" id="sns-dstatus" style="color:var(--ok);">✓ Physical sensors verified</div></div>
     </div>
-    <div class="dg">
-      <div class="dg-lbl">Hardware Forensics</div>
-      <div class="info-full" id="sns-list-container">
-        <!-- Sensor rows populated dynamically -->
+    
+    <!-- Sensors Summary Mini-Grid -->
+    <div class="sg" style="margin-bottom: 16px;">
+      <div class="sc2">
+        <div class="slbl">Total Audited</div>
+        <div class="sv ok" id="sns-stat-total">—</div>
+      </div>
+      <div class="sc2">
+        <div class="slbl">Hardware Vendors</div>
+        <div class="sv" id="sns-stat-vendors" style="color:var(--accent);">—</div>
       </div>
     </div>
-    <div class="ib okb" id="sns-explanation">Sensors help verify component integration and trace whether modules like the screen assembly (containing light/proximity sensors) were replaced with generic components.</div>
+
+    <!-- Search & Filter Bar -->
+    <div class="sensor-filter-bar" style="margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px;">
+      <!-- Search Input -->
+      <div class="sensor-search-wrapper" style="position: relative; width: 100%;">
+        <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--textd); font-size: 13px;">🔍</span>
+        <input type="text" id="sensor-search-input" placeholder="Search by sensor name, vendor, or type..." 
+               style="width: 100%; padding: 10px 12px 10px 36px; border-radius: 8px; background: var(--bg3); border: 1px solid var(--border); color: #fff; font-family: var(--font); font-size: 13px; outline: none; transition: border-color 0.2s;"
+               oninput="filterSensors()">
+      </div>
+      
+      <!-- Category Pills -->
+      <div class="sensor-tabs-scroll" style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; -ms-overflow-style: none;">
+        <button class="sensor-tab-btn active" onclick="setSensorCategory('all')" id="tab-btn-all" style="padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg2); color: var(--textm); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: var(--font);">All Sensors</button>
+        <button class="sensor-tab-btn" onclick="setSensorCategory('motion')" id="tab-btn-motion" style="padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg3); color: var(--textd); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: var(--font);">🫨 Motion</button>
+        <button class="sensor-tab-btn" onclick="setSensorCategory('position')" id="tab-btn-position" style="padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg3); color: var(--textd); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: var(--font);">📏 Position</button>
+        <button class="sensor-tab-btn" onclick="setSensorCategory('environment')" id="tab-btn-environment" style="padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg3); color: var(--textd); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: var(--font);">💡 Environment</button>
+        <button class="sensor-tab-btn" onclick="setSensorCategory('biometric')" id="tab-btn-biometric" style="padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg3); color: var(--textd); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: var(--font);">🧬 Biometric</button>
+        <button class="sensor-tab-btn" onclick="setSensorCategory('other')" id="tab-btn-other" style="padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg3); color: var(--textd); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: var(--font);">🧭 System/Other</button>
+      </div>
+    </div>
+
+    <div class="dg" style="margin-top: 0; padding-top: 0; border-top: none;">
+      <div class="dg-lbl" id="sns-list-title">Hardware Forensics</div>
+      <div id="sns-list-container">
+        <!-- Sensor rows/sections populated dynamically -->
+      </div>
+    </div>
+    <div class="ib okb" id="sns-explanation" style="margin-top: 14px;">Sensors help verify component integration and trace whether modules like the screen assembly (containing light/proximity sensors) were replaced with generic components.</div>
     <button class="btn-p" onclick="go('results')">← Back to Report</button>
   </div>
 
@@ -1217,6 +1464,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="info-sec-title">Display</div>
       <div class="info-full">
         <div class="info-row"><span class="info-row-key">Resolution</span><span class="info-row-val" id="info-res">—</span></div>
+        <div class="info-row"><span class="info-row-key">Refresh Rate</span><span class="info-row-val" id="info-ref-rate">—</span></div>
       </div>
     </div>
     <div class="info-section">
@@ -1235,6 +1483,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         <div class="info-card"><div class="info-label">Total</div><div class="info-value" id="info-sto-tot">—</div></div>
         <div class="info-card"><div class="info-label">Used</div><div class="info-value" id="info-sto-use">—</div></div>
         <div class="info-card"><div class="info-label">Free</div><div class="info-value" id="info-sto-fre">—</div></div>
+      </div>
+      <div class="info-full" style="margin-top: 10px;">
+        <div class="info-row"><span class="info-row-key">Storage Type</span><span class="info-row-val" id="info-sto-type">—</span></div>
+        <div class="info-row"><span class="info-row-key">Benchmark Write Speed</span><span class="info-row-val" id="info-sto-speed">—</span></div>
       </div>
     </div>
     <div class="info-section">
@@ -1255,11 +1507,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     </div>
     <div class="bat">
       <div class="brow bhr"><div class="bc">Component</div><div class="bc">Before</div><div class="bc">After</div></div>
-      <div class="brow"><div class="bc blbl">🔋 Battery</div><div class="bc bok" id="ba-bat-before">—</div><div class="bc" id="ba-bat-after">—</div></div>
-      <div class="brow"><div class="bc blbl">💾 Storage</div><div class="bc bok" id="ba-sto-before">—</div><div class="bc" id="ba-sto-after">—</div></div>
-      <div class="brow"><div class="bc blbl">📊 RAM</div><div class="bc bok" id="ba-ram-before">—</div><div class="bc" id="ba-ram-after">—</div></div>
-      <div class="brow"><div class="bc blbl">⚙️ CPU</div><div class="bc bok" id="ba-cpu-before">—</div><div class="bc" id="ba-cpu-after">—</div></div>
-      <div class="brow"><div class="bc blbl">🖥️ Display</div><div class="bc bok" id="ba-dsp-before">—</div><div class="bc" id="ba-dsp-after">—</div></div>
+      <div class="brow"><div class="bc blbl">🔋 Battery Capacity</div><div class="bc bok" id="ba-bat-before">—</div><div class="bc" id="ba-bat-after">—</div></div>
+      <div class="brow"><div class="bc blbl">⚡ Battery Cycle Count</div><div class="bc bok" id="ba-batcycle-before">—</div><div class="bc" id="ba-batcycle-after">—</div></div>
+      <div class="brow"><div class="bc blbl">💾 Storage Capacity</div><div class="bc bok" id="ba-sto-before">—</div><div class="bc" id="ba-sto-after">—</div></div>
+      <div class="brow"><div class="bc blbl">🚀 Storage Write Speed</div><div class="bc bok" id="ba-stospeed-before">—</div><div class="bc" id="ba-stospeed-after">—</div></div>
+      <div class="brow"><div class="bc blbl">📊 RAM Capacity</div><div class="bc bok" id="ba-ram-before">—</div><div class="bc" id="ba-ram-after">—</div></div>
+      <div class="brow"><div class="bc blbl">⚙️ CPU Chipset</div><div class="bc bok" id="ba-cpu-before">—</div><div class="bc" id="ba-cpu-after">—</div></div>
+      <div class="brow"><div class="bc blbl">🖥️ Display Resolution</div><div class="bc bok" id="ba-dsp-before">—</div><div class="bc" id="ba-dsp-after">—</div></div>
+      <div class="brow"><div class="bc blbl">🔄 Display Refresh Rate</div><div class="bc bok" id="ba-dsphz-before">—</div><div class="bc" id="ba-dsphz-after">—</div></div>
+      <div class="brow"><div class="bc blbl">🧭 Physical Sensors Suite</div><div class="bc bok" id="ba-sensors-before">—</div><div class="bc" id="ba-sensors-after">—</div></div>
     </div>
     <div class="ob">Scan your phone before and after repair to compare. Save a scan before handing your phone over.</div>
     <button class="btn-p" onclick="saveCurrentScan()">💾 Save Current Scan as "Before"</button>
@@ -1390,19 +1646,6 @@ function startScan() {
 }
 
 function runScanWithFetch(btn) {
-  const steps = [
-    {id:'si-bat', p:'18%'},
-    {id:'si-sto', p:'36%'},
-    {id:'si-cpu', p:'54%'},
-    {id:'si-dsp', p:'65%'},
-    {id:'si-ai', p:'82%'},
-    {id:'si-cmp', p:'100%'}
-  ];
-  let step = 0;
-  let fetchDone = false;
-  let fetchData = null;
-  let fetchError = null;
-
   const stbar = document.getElementById('stbar');
   const termBody = document.getElementById('term-body');
   
@@ -1419,67 +1662,102 @@ function runScanWithFetch(btn) {
     termBody.scrollTop = termBody.scrollHeight;
   }
 
-  const stepLogs = [
-    [
-      { text: '> Initiating battery metrics interrogation...', type: 'sys' },
-      { text: '$ adb shell dumpsys battery', type: 'cmd' },
-      { text: '✓ Battery capacity and health reports parsed.', type: 'data' }
-    ],
-    [
-      { text: '> Auditing internal disk partition structure...', type: 'sys' },
-      { text: '$ adb shell df /data', type: 'cmd' },
-      { text: '✓ Filesystem blocks and mount allocations mapped.', type: 'data' }
-    ],
-    [
-      { text: '> Querying CPU board & hardware SoC info...', type: 'sys' },
-      { text: '$ adb shell getprop ro.board.platform', type: 'cmd' },
-      { text: '$ adb shell getprop ro.soc.model', type: 'cmd' },
-      { text: '✓ Processor architecture and codenames loaded.', type: 'data' }
-    ],
-    [
-      { text: '> Fetching display panel sizing profile...', type: 'sys' },
-      { text: '$ adb shell wm size', type: 'cmd' },
-      { text: '✓ Physical display resolution verified.', type: 'data' }
-    ],
-    [
-      { text: '> Contacting specs database engine...', type: 'sys' },
-      { text: '> Querying MobileAPI cache & overrides...', type: 'sys' },
-      { text: '✓ Official specifications retrieved successfully.', type: 'data' }
-    ],
-    [
-      { text: '> Correlating diagnostic parameters vs official...', type: 'sys' },
-      { text: '> Generating forensic validation matrix...', type: 'sys' },
-      { text: '✓ Diagnostics check completed. Printing report.', type: 'data' }
-    ]
-  ];
+  const stepMap = {
+    bat: 'si-bat',
+    sto: 'si-sto',
+    cpu: 'si-cpu',
+    dsp: 'si-dsp',
+    ai: 'si-ai',
+    cmp: 'si-cmp'
+  };
 
-  function printLogGroup(groupIndex) {
-    const lines = stepLogs[groupIndex];
-    if (!lines) return;
-    lines.forEach((line, index) => {
-      setTimeout(() => {
-        addTerminalLine(line.text, line.type);
-      }, index * 180);
-    });
-  }
-
-  fetch(API_BASE + '/scan')
-    .then(async res => {
-      const contentType = res.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Scan failed');
-        return data;
-      } else {
-        throw new Error('Server returned invalid response (Not JSON). Ensure Flask server is running.');
+  // Keep track of which step elements have been modified so we can reset or clean up if needed
+  Object.values(stepMap).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.classList.remove('active', 'done');
+      if (el.querySelector('.sci-st')) {
+        el.querySelector('.sci-st').textContent = 'IDLE';
+        el.querySelector('.sci-st').style.display = 'none';
       }
-    })
-    .then(data => { fetchData = data; })
-    .catch(err => { 
-      fetchError = err;
-      addTerminalLine(`ERROR: ${err.message || 'Scan failed'}`, 'err');
-    })
-    .finally(() => { fetchDone = true; });
+    }
+  });
+
+  let eventSource = null;
+  let fetchData = null;
+  let fetchError = null;
+
+  try {
+    const url = API_BASE + '/scan_stream';
+    eventSource = new EventSource(url);
+    
+    eventSource.onmessage = function(event) {
+      let data;
+      try {
+        data = JSON.parse(event.data);
+      } catch (e) {
+        console.error('Failed to parse SSE event data:', event.data);
+        return;
+      }
+
+      if (data.type === 'result') {
+        fetchData = data.data;
+        eventSource.close();
+        finishScan();
+      } else if (data.type === 'err') {
+        fetchError = new Error(data.text || 'Scan failed');
+        addTerminalLine(`ERROR: ${data.text || 'Scan failed'}`, 'err');
+        eventSource.close();
+        finishScan();
+      } else if (data.type === 'step') {
+        const stepId = stepMap[data.name];
+        if (stepId) {
+          const el = document.getElementById(stepId);
+          if (el) {
+            if (data.status === 'active') {
+              el.classList.add('active');
+              el.classList.remove('done');
+              const st = el.querySelector('.sci-st');
+              if (st) {
+                st.textContent = 'SCANNING';
+                st.style.display = 'inline';
+              }
+            } else if (data.status === 'done') {
+              el.classList.remove('active');
+              el.classList.add('done');
+              const st = el.querySelector('.sci-st');
+              if (st) {
+                st.textContent = 'DONE ✓';
+                st.style.display = 'inline';
+              }
+            }
+          }
+        }
+        if (data.p) {
+          document.getElementById('pf').style.width = data.p;
+          document.getElementById('plbl').textContent = data.p;
+        }
+      } else {
+        // Handle normal log types: sys, cmd, stdout, success, etc.
+        addTerminalLine(data.text, data.type);
+      }
+    };
+
+    eventSource.onerror = function(err) {
+      console.error('EventSource connection error:', err);
+      if (!fetchData && !fetchError) {
+        fetchError = new Error('Lost connection to scan server.');
+        addTerminalLine('ERROR: Connection to scanner lost.', 'err');
+        eventSource.close();
+        finishScan();
+      }
+    };
+
+  } catch (err) {
+    fetchError = err;
+    addTerminalLine(`ERROR: ${err.message || 'Scan initialization failed'}`, 'err');
+    finishScan();
+  }
 
   function finishScan() {
     scanInProgress = false;
@@ -1498,33 +1776,6 @@ function runScanWithFetch(btn) {
     populateAll();
     go('results');
   }
-
-  function tick() {
-    if (step > 0) {
-      const prev = document.getElementById(steps[step - 1].id);
-      prev.classList.remove('active');
-      prev.classList.add('done');
-      if (prev.querySelector('.sci-st')) prev.querySelector('.sci-st').textContent = 'DONE ✓';
-    }
-    if (step < steps.length) {
-      const cur = document.getElementById(steps[step].id);
-      cur.classList.add('active');
-      if (cur.querySelector('.sci-st')) cur.querySelector('.sci-st').textContent = 'SCANNING...';
-      document.getElementById('pf').style.width = steps[step].p;
-      document.getElementById('plbl').textContent = steps[step].p;
-      
-      printLogGroup(step);
-      
-      step++;
-      setTimeout(tick, 700);
-    } else if (!fetchDone) {
-      setTimeout(tick, 300);
-    } else {
-      setTimeout(finishScan, 400);
-    }
-  }
-
-  tick();
 }
 
 // ─── PRIVACY AUDITOR ENGINE ─────────────────────────────
@@ -1636,6 +1887,7 @@ function populatePhoneInfo(d) {
   document.getElementById('info-android').textContent  = d.device.android;
   document.getElementById('info-chipset').textContent  = d.device.chipset;
   document.getElementById('info-res').textContent      = d.display.resolution;
+  document.getElementById('info-ref-rate').textContent = d.display.refresh_rate || 'N/A';
   document.getElementById('info-bat-lvl').textContent  = d.battery.level + '%';
   document.getElementById('info-bat-hlt').textContent  = d.battery.health;
   document.getElementById('info-bat-tmp').textContent  = d.battery.temperature;
@@ -1644,6 +1896,8 @@ function populatePhoneInfo(d) {
   document.getElementById('info-sto-tot').textContent  = d.storage.total;
   document.getElementById('info-sto-use').textContent  = d.storage.used;
   document.getElementById('info-sto-fre').textContent  = d.storage.free;
+  document.getElementById('info-sto-type').textContent = (d.official && d.official.storage_type) ? d.official.storage_type : 'N/A';
+  document.getElementById('info-sto-speed').textContent = d.storage.speed_mbs ? (d.storage.speed_mbs + ' MB/s') : 'N/A';
   document.getElementById('info-ram-tot').textContent  = d.ram.total;
   document.getElementById('info-ram-avl').textContent  = d.ram.available;
 }
@@ -1932,22 +2186,170 @@ function setMockGlow(elId, comp) {
   }
 }
 
+let currentSensorCategory = 'all';
+
 function initSensorsDetail() {
+  if (!scanData) return;
+  const list = document.getElementById('sns-list-container');
+  
+  // Reset search input
+  const searchInput = document.getElementById('sensor-search-input');
+  if (searchInput) searchInput.value = '';
+  
+  currentSensorCategory = 'all';
+  document.querySelectorAll('.sensor-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const allBtn = document.getElementById('tab-btn-all');
+  if (allBtn) allBtn.classList.add('active');
+  
+  const sensors = scanData.sensors || [];
+  
+  // Update statistics
+  const statTotal = document.getElementById('sns-stat-total');
+  if (statTotal) statTotal.textContent = `${sensors.length} Sensors`;
+  
+  const statVendors = document.getElementById('sns-stat-vendors');
+  if (statVendors) {
+    const uniqueVendors = new Set(sensors.map(s => (s.vendor || '').trim()).filter(v => v)).size;
+    statVendors.textContent = `${uniqueVendors} Vendors`;
+  }
+  
+  const snsDstatus = document.getElementById('sns-dstatus');
+  if (snsDstatus) {
+    snsDstatus.textContent = `✓ ${sensors.length} physical sensors verified`;
+  }
+  
+  renderSensors();
+}
+
+function renderSensors() {
   if (!scanData) return;
   const list = document.getElementById('sns-list-container');
   const sensors = scanData.sensors || [];
   
   if (!sensors.length) {
-    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--textd);">No physical sensors detected.</div>';
+    list.innerHTML = '<div style="text-align:center;padding:25px;color:var(--textd);">No physical sensors detected.</div>';
     return;
   }
   
-  list.innerHTML = sensors.map((s) => {
-    return `<div class="info-row">
-      <span class="info-row-key" style="font-weight:600; color:var(--text);">${s.type}</span>
-      <span class="info-row-val" style="color:var(--accent); font-weight:600;">${s.name} <span style="font-size:10px; color:var(--textd); font-weight:normal;">(${s.vendor})</span></span>
-    </div>`;
-  }).join('');
+  const searchInput = document.getElementById('sensor-search-input');
+  const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+  
+  const categories = {
+    motion: { name: 'Motion & Kinematics', icon: '🫨', color: '#6c8ef5', bg: 'rgba(108, 142, 245, 0.08)', border: 'rgba(108, 142, 245, 0.18)' },
+    position: { name: 'Position & Orientation', icon: '📏', color: '#10b981', bg: 'rgba(16, 185, 129, 0.08)', border: 'rgba(16, 185, 129, 0.18)' },
+    environment: { name: 'Environment Sensors', icon: '💡', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.18)' },
+    biometric: { name: 'Biometrics & Health', icon: '🧬', color: '#ec4899', bg: 'rgba(236, 72, 153, 0.08)', border: 'rgba(236, 72, 153, 0.18)' },
+    other: { name: 'System & Virtual Sensors', icon: '🧭', color: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.08)', border: 'rgba(139, 92, 246, 0.18)' }
+  };
+  
+  function getSensorCategory(type) {
+    const t = type.toLowerCase();
+    if (t.includes('accelerometer') || t.includes('gyro') || t.includes('motion') || t.includes('gravity') || t.includes('rotation') || t.includes('linear')) return 'motion';
+    if (t.includes('magnetic') || t.includes('compass') || t.includes('magnetometer') || t.includes('proximity') || t.includes('orientation')) return 'position';
+    if (t.includes('light') || t.includes('barometer') || t.includes('pressure') || t.includes('temperature') || t.includes('humidity') || t.includes('ambient')) return 'environment';
+    if (t.includes('fingerprint') || t.includes('biometric') || t.includes('heart') || t.includes('step') || t.includes('pedometer')) return 'biometric';
+    return 'other';
+  }
+  
+  function getSensorIcon(type) {
+    const t = type.toLowerCase();
+    if (t.includes('accelerometer') || t.includes('motion')) return '🫨';
+    if (t.includes('gyroscope') || t.includes('gyro')) return '🔄';
+    if (t.includes('light')) return '💡';
+    if (t.includes('proximity')) return '📏';
+    if (t.includes('magnetic') || t.includes('compass') || t.includes('magnetometer')) return '🧲';
+    if (t.includes('barometer') || t.includes('pressure')) return '🎈';
+    if (t.includes('fingerprint') || t.includes('biometric')) return '🧬';
+    if (t.includes('temperature') || t.includes('thermometer') || t.includes('ambient')) return '🌡️';
+    if (t.includes('step') || t.includes('pedometer') || t.includes('tilt')) return '👣';
+    if (t.includes('gravity')) return '🌌';
+    return '🧭';
+  }
+  
+  const filtered = sensors.filter(s => {
+    const matchesSearch = !query || 
+      (s.name || '').toLowerCase().includes(query) || 
+      (s.vendor || '').toLowerCase().includes(query) || 
+      (s.type || '').toLowerCase().includes(query);
+      
+    const cat = getSensorCategory(s.type);
+    const matchesCategory = currentSensorCategory === 'all' || cat === currentSensorCategory;
+    
+    return matchesSearch && matchesCategory;
+  });
+  
+  if (!filtered.length) {
+    list.innerHTML = '<div style="text-align:center;padding:30px;color:var(--textd);">No sensors match your query or filters.</div>';
+    return;
+  }
+  
+  // Group sensors by category
+  const grouped = {};
+  filtered.forEach(s => {
+    const catKey = getSensorCategory(s.type);
+    if (!grouped[catKey]) grouped[catKey] = [];
+    grouped[catKey].push(s);
+  });
+  
+  let html = '';
+  
+  Object.keys(categories).forEach(catKey => {
+    const catSensors = grouped[catKey];
+    if (!catSensors || !catSensors.length) return;
+    
+    const catInfo = categories[catKey];
+    
+    html += `
+      <div class="sensor-section" style="margin-bottom: 20px;">
+        <div class="sensor-section-header" style="display:flex; align-items:center; gap:8px; margin: 16px 0 8px 0; font-size:11px; font-weight:700; color:var(--textd); letter-spacing:0.8px; text-transform:uppercase;">
+          <span style="color:${catInfo.color}; font-size: 13px;">${catInfo.icon}</span> 
+          <span>${catInfo.name}</span> 
+          <span class="sensor-section-count" style="font-size:9px; font-family:var(--mono); background:var(--bg3); border:1px solid var(--border); padding:1px 5px; border-radius:8px; margin-left:6px; color:var(--textm);">${catSensors.length}</span>
+        </div>
+        <div class="sensor-grid">
+          ${catSensors.map(s => {
+            const icon = getSensorIcon(s.type);
+            return `
+              <div class="sensor-item-card" style="--sensor-accent: ${catInfo.color}; --sensor-bg: ${catInfo.bg}; --sensor-border: ${catInfo.border};">
+                <div class="sensor-item-icon">${icon}</div>
+                <div class="sensor-item-details">
+                  <div class="sensor-item-header">
+                    <div class="sensor-item-type" title="${s.type}">${s.type}</div>
+                  </div>
+                  <div class="sensor-item-name" title="${s.name}">${s.name}</div>
+                  <div class="sensor-item-meta">
+                    <div class="sensor-item-vendor" title="${s.vendor}">${s.vendor || 'Generic'}</div>
+                    <div class="sensor-status-pill">
+                      <span class="sensor-pulse"></span>
+                      <span>Active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+  
+  list.innerHTML = html;
+}
+
+function setSensorCategory(cat) {
+  currentSensorCategory = cat;
+  document.querySelectorAll('.sensor-tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  const btn = document.getElementById(`tab-btn-${cat}`);
+  if (btn) btn.classList.add('active');
+  renderSensors();
+}
+
+function filterSensors() {
+  renderSensors();
 }
 
 // ─── HEALTH ──────────────────────────────────────────────
@@ -2110,38 +2512,83 @@ function initBeforeAfter() {
   if (saved) beforeScan = JSON.parse(saved);
 
   if (beforeScan) {
-    document.getElementById('ba-bat-before').textContent = beforeScan.battery.level + '% · ' + beforeScan.battery.health;
-    document.getElementById('ba-sto-before').textContent = beforeScan.storage.total;
-    document.getElementById('ba-ram-before').textContent = beforeScan.ram.total;
-    document.getElementById('ba-cpu-before').textContent = beforeScan.device.codename || beforeScan.device.chipset;
-    document.getElementById('ba-dsp-before').textContent = beforeScan.display.resolution;
+    document.getElementById('ba-bat-before').textContent = (beforeScan.battery.level || '—') + '% · ' + (beforeScan.battery.health || '—');
+    document.getElementById('ba-batcycle-before').textContent = (beforeScan.battery.cycle_count || 'N/A') + ' cycles';
+    document.getElementById('ba-sto-before').textContent = beforeScan.storage.total || '—';
+    document.getElementById('ba-stospeed-before').textContent = beforeScan.storage.speed_mbs ? (beforeScan.storage.speed_mbs + ' MB/s') : 'N/A';
+    document.getElementById('ba-ram-before').textContent = beforeScan.ram.total || '—';
+    document.getElementById('ba-cpu-before').textContent = beforeScan.device.codename || beforeScan.device.chipset || '—';
+    document.getElementById('ba-dsp-before').textContent = beforeScan.display.resolution || '—';
+    document.getElementById('ba-dsphz-before').textContent = beforeScan.display.refresh_rate || 'N/A';
+    document.getElementById('ba-sensors-before').textContent = (beforeScan.sensors || []).length + ' sensors';
   }
 
   if (scanData) {
     const batAfter = document.getElementById('ba-bat-after');
+    const batcycleAfter = document.getElementById('ba-batcycle-after');
     const stoAfter = document.getElementById('ba-sto-after');
+    const stospeedAfter = document.getElementById('ba-stospeed-after');
     const ramAfter = document.getElementById('ba-ram-after');
     const cpuAfter = document.getElementById('ba-cpu-after');
     const dspAfter = document.getElementById('ba-dsp-after');
+    const dsphzAfter = document.getElementById('ba-dsphz-after');
+    const sensorsAfter = document.getElementById('ba-sensors-after');
 
-    batAfter.textContent = scanData.battery.level + '% · ' + scanData.battery.health;
-    stoAfter.textContent = scanData.storage.total;
-    ramAfter.textContent = scanData.ram.total;
-    cpuAfter.textContent = scanData.device.codename || scanData.device.chipset;
-    dspAfter.textContent = scanData.display.resolution;
+    batAfter.textContent = (scanData.battery.level || '—') + '% · ' + (scanData.battery.health || '—');
+    batcycleAfter.textContent = (scanData.battery.cycle_count || 'N/A') + ' cycles';
+    stoAfter.textContent = scanData.storage.total || '—';
+    stospeedAfter.textContent = scanData.storage.speed_mbs ? (scanData.storage.speed_mbs + ' MB/s') : 'N/A';
+    ramAfter.textContent = scanData.ram.total || '—';
+    cpuAfter.textContent = scanData.device.codename || scanData.device.chipset || '—';
+    dspAfter.textContent = scanData.display.resolution || '—';
+    dsphzAfter.textContent = scanData.display.refresh_rate || 'N/A';
+    sensorsAfter.textContent = (scanData.sensors || []).length + ' sensors';
 
     if (beforeScan) {
       const batChanged = beforeScan.battery.health !== scanData.battery.health;
+      
+      // Battery cycle count change: alert if cycles go down (reset) or change by more than 5
+      let cycleDiff = false;
+      const bCycles = parseInt(beforeScan.battery.cycle_count);
+      const aCycles = parseInt(scanData.battery.cycle_count);
+      if (!isNaN(bCycles) && !isNaN(aCycles)) {
+        cycleDiff = aCycles < bCycles || Math.abs(aCycles - bCycles) > 5;
+      } else if (beforeScan.battery.cycle_count !== scanData.battery.cycle_count) {
+        cycleDiff = true; // Fallback string mismatch
+      }
+      
       const stoChanged = beforeScan.storage.total !== scanData.storage.total;
+      
+      // Storage speed change: alert if write performance drops significantly (>50 MB/s)
+      let speedChanged = false;
+      const bSpeed = parseFloat(beforeScan.storage.speed_mbs);
+      const aSpeed = parseFloat(scanData.storage.speed_mbs);
+      if (!isNaN(bSpeed) && !isNaN(aSpeed)) {
+        speedChanged = Math.abs(bSpeed - aSpeed) > 50; 
+      }
+      
       const ramChanged = beforeScan.ram.total !== scanData.ram.total;
       const cpuChanged = (beforeScan.device.codename || beforeScan.device.chipset) !== (scanData.device.codename || scanData.device.chipset);
       const dspChanged = beforeScan.display.resolution !== scanData.display.resolution;
+      const dsphzChanged = (beforeScan.display.refresh_rate || '') !== (scanData.display.refresh_rate || '');
+      
+      // Check if physical sensor driver signatures changed
+      let sensorsChanged = false;
+      const beforeSnsNames = (beforeScan.sensors || []).map(s => `${s.name || ''}|${s.vendor || ''}`).sort().join(';');
+      const afterSnsNames = (scanData.sensors || []).map(s => `${s.name || ''}|${s.vendor || ''}`).sort().join(';');
+      if (beforeSnsNames !== afterSnsNames) {
+        sensorsChanged = true;
+      }
 
       batAfter.className = batChanged ? 'bc bbd' : 'bc bok';
+      batcycleAfter.className = cycleDiff ? 'bc bbd' : 'bc bok';
       stoAfter.className = stoChanged ? 'bc bbd' : 'bc bok';
+      stospeedAfter.className = speedChanged ? 'bc bbd' : 'bc bok';
       ramAfter.className = ramChanged ? 'bc bbd' : 'bc bok';
       cpuAfter.className = cpuChanged ? 'bc bbd' : 'bc bok';
       dspAfter.className = dspChanged ? 'bc bbd' : 'bc bok';
+      dsphzAfter.className = dsphzChanged ? 'bc bbd' : 'bc bok';
+      sensorsAfter.className = sensorsChanged ? 'bc bbd' : 'bc bok';
     }
   }
 }
@@ -2173,25 +2620,120 @@ function initHoverSync() {
     { card: 'sns-card', chip: 'mock-sns' }
   ];
 
+  const tooltip = document.getElementById('svg-tooltip');
+  const mockupSticky = document.querySelector('.mockup-sticky');
+
+  function showTooltipFor(chipId, chipEl) {
+    if (!tooltip || !mockupSticky || !scanData) return;
+
+    let title = '';
+    let value = '';
+    let statusText = '';
+    let flag = 'warn';
+
+    switch(chipId) {
+      case 'mock-dsp':
+        title = 'Display Panel';
+        const resVal = (scanData.display && scanData.display.resolution) ? scanData.display.resolution : 'N/A';
+        const hzVal = (scanData.display && scanData.display.refresh_rate) ? scanData.display.refresh_rate : '';
+        value = hzVal ? `${resVal} (${hzVal})` : resVal;
+        const dspComp = scanData.comparisons && scanData.comparisons.display;
+        flag = dspComp ? dspComp.flag : 'warn';
+        statusText = dspComp ? dspComp.message : 'Unverified';
+        break;
+      case 'mock-ram':
+        title = 'Random Access Memory';
+        value = (scanData.ram && scanData.ram.total) ? scanData.ram.total : 'N/A';
+        const ramComp = scanData.comparisons && scanData.comparisons.ram;
+        flag = ramComp ? ramComp.flag : 'warn';
+        statusText = ramComp ? ramComp.message : 'Unverified';
+        break;
+      case 'mock-sto':
+        title = 'Flash Storage';
+        const totVal = (scanData.storage && scanData.storage.total) ? scanData.storage.total : 'N/A';
+        const speedVal = (scanData.storage && scanData.storage.speed_mbs) ? `${scanData.storage.speed_mbs} MB/s` : '';
+        value = speedVal ? `${totVal} (${speedVal})` : totVal;
+        const stoComp = scanData.comparisons && scanData.comparisons.storage;
+        flag = stoComp ? stoComp.flag : 'warn';
+        statusText = stoComp ? stoComp.message : 'Unverified';
+        break;
+      case 'mock-cpu':
+        title = 'Processor (SoC)';
+        value = (scanData.device && scanData.device.chipset) ? scanData.device.chipset : ((scanData.device && scanData.device.codename) ? scanData.device.codename : 'N/A');
+        const cpuComp = scanData.comparisons && scanData.comparisons.chipset;
+        flag = cpuComp ? cpuComp.flag : 'warn';
+        statusText = cpuComp ? cpuComp.message : 'Unverified';
+        break;
+      case 'mock-bat':
+        title = 'Battery Subsystem';
+        const level = (scanData.battery && scanData.battery.level) ? scanData.battery.level : 'N/A';
+        const health = (scanData.battery && scanData.battery.health) ? scanData.battery.health : 'N/A';
+        value = `Level: ${level}%, Health: ${health}`;
+        const batComp = scanData.comparisons && scanData.comparisons.battery;
+        flag = batComp ? batComp.flag : 'warn';
+        statusText = batComp ? batComp.message : 'Unverified';
+        break;
+      case 'mock-sns':
+        title = 'Sensors Array';
+        const sensorCount = scanData.sensors ? scanData.sensors.length : 0;
+        value = `${sensorCount} Active Sensors`;
+        flag = 'ok';
+        statusText = 'Hardware responsive';
+        break;
+      default:
+        return;
+    }
+
+    // Populate tooltip HTML
+    tooltip.innerHTML = `
+      <div class="tooltip-title">${title}</div>
+      <div class="tooltip-value">${value}</div>
+      <div class="tooltip-status">
+        <span class="tooltip-status-dot ${flag}"></span>
+        ${statusText}
+      </div>
+    `;
+
+    // Position tooltip
+    const chipRect = chipEl.getBoundingClientRect();
+    const stickyRect = mockupSticky.getBoundingClientRect();
+    const x = (chipRect.left - stickyRect.left) + (chipRect.width / 2);
+    const y = (chipRect.top - stickyRect.top) - 8;
+
+    tooltip.style.left = `${x}px`;
+    tooltip.style.top = `${y}px`;
+    tooltip.classList.add('show');
+  }
+
+  function hideTooltip() {
+    if (tooltip) {
+      tooltip.classList.remove('show');
+    }
+  }
+
   mappings.forEach(({ card, chip }) => {
     const cardEl = document.getElementById(card);
     const chipEl = document.getElementById(chip);
 
     if (cardEl && chipEl) {
-      // Hover card -> boost corresponding SVG chip on motherboard
+      // Hover card -> boost corresponding SVG chip on motherboard & show tooltip
       cardEl.addEventListener('mouseenter', () => {
         chipEl.classList.add('hover-boost');
+        showTooltipFor(chip, chipEl);
       });
       cardEl.addEventListener('mouseleave', () => {
         chipEl.classList.remove('hover-boost');
+        hideTooltip();
       });
 
-      // Hover SVG chip -> highlight card on the right
+      // Hover SVG chip -> highlight card on the right & show tooltip
       chipEl.addEventListener('mouseenter', () => {
         cardEl.classList.add('card-highlight');
+        showTooltipFor(chip, chipEl);
       });
       chipEl.addEventListener('mouseleave', () => {
         cardEl.classList.remove('card-highlight');
+        hideTooltip();
       });
     }
   });

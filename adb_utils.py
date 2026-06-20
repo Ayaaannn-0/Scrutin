@@ -70,6 +70,7 @@ def parse_battery(raw):
         "temperature": "N/A",
         "voltage": "N/A",
         "technology": "Li-ion",
+        "cycle_count": "N/A",
     }
     if not raw:
         return data
@@ -79,6 +80,7 @@ def parse_battery(raw):
     temp_match = re.search(r"\btemperature:\s*(\d+)", raw)
     volt_match = re.search(r"\bvoltage:\s*(\d+)", raw)
     tech_match = re.search(r"\btechnology:\s*([^\s]+)", raw)
+    cycle_match = re.search(r"(?:cycle count|cycle_count|cycles|Cycle count):\s*(\d+)", raw, re.IGNORECASE)
 
     if level_match:
         data["level"] = level_match.group(1)
@@ -91,6 +93,8 @@ def parse_battery(raw):
         data["voltage"] = f"{v_val} mV"
     if tech_match:
         data["technology"] = tech_match.group(1)
+    if cycle_match:
+        data["cycle_count"] = cycle_match.group(1)
 
     health_map = {
         "1": "Unknown",
@@ -189,6 +193,70 @@ def parse_sensors(raw_dumpsys):
                 "vendor": vendor,
                 "type": sensor_type
             })
-            if len(sensors) >= 12:
+            if len(sensors) >= 150:
                 break
     return sensors
+
+
+def parse_refresh_rate(raw_dumpsys_display, raw_settings_peak=None):
+    if raw_settings_peak:
+        try:
+            val = float(raw_settings_peak.strip())
+            if val > 0:
+                return f"{round(val)} Hz"
+        except ValueError:
+            pass
+
+    if not raw_dumpsys_display:
+        return "60 Hz"
+
+    # Pattern 1: e.g. "fps=120"
+    match = re.search(r"\bfps=(\d+)", raw_dumpsys_display)
+    if match:
+        return f"{match.group(1)} Hz"
+
+    # Pattern 2: e.g. "refreshRate=120.0"
+    match = re.search(r"\brefreshRate=(\d+(?:\.\d+)?)", raw_dumpsys_display)
+    if match:
+        return f"{round(float(match.group(1)))} Hz"
+
+    # Pattern 3: e.g. "mPhys=1080x2400@120.00"
+    match = re.search(r"@(\d+(?:\.\d+)?)", raw_dumpsys_display)
+    if match:
+        return f"{round(float(match.group(1)))} Hz"
+
+    return "60 Hz"
+
+
+def run_storage_benchmark(serial=None):
+    import time
+    cmd = ["adb"]
+    if serial:
+        cmd.extend(["-s", serial])
+    cmd.extend(["shell", "dd if=/dev/zero of=/data/local/tmp/speedtest bs=102400 count=200"])
+    
+    try:
+        start_time = time.time()
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        duration = time.time() - start_time
+        
+        cleanup_cmd = ["adb"]
+        if serial:
+            cleanup_cmd.extend(["-s", serial])
+        cleanup_cmd.extend(["shell", "rm -f /data/local/tmp/speedtest"])
+        subprocess.run(cleanup_cmd, capture_output=True)
+        
+        speed = round(20.48 / duration, 1) if duration > 0 else 0
+        raw_stats = result.stderr.strip() or result.stdout.strip()
+        if not raw_stats:
+            raw_stats = f"20480000 bytes transferred in {round(duration, 3)}s ({speed} MB/s)"
+        
+        return {
+            "speed_mbs": speed,
+            "raw_output": raw_stats
+        }
+    except Exception as e:
+        return {
+            "speed_mbs": 0,
+            "raw_output": f"Benchmark failed: {str(e)}"
+        }

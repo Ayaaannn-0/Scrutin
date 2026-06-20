@@ -1,14 +1,14 @@
 # Scrutin
 ### Know what's inside your phone
 
-A consumer tool to detect fake or replaced phone components after repair.
+A consumer tool to detect cheap or replaced phone components after repair.
 No trust — only data.
 
 ---
 
 ## The Problem
 
-Every day millions of people get cheated at repair shops with fake or cheap replacement components. There's no way for a normal person to verify if the parts used are genuine.
+Every day millions of people get cheated at repair shops with cheap replacement or non-original components. There's no way for a normal person to verify if the parts used are genuine.
 
 ## The Solution
 
