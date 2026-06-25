@@ -869,6 +869,282 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .term-line.err {
   color: #ef4444;
 }
+
+/* ── 2-Column Responsive Dashboard Layout ── */
+.app:has(#dashboard.active) {
+  transition: max-width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (min-width: 768px) {
+  .app:has(#dashboard.active) {
+    max-width: 960px !important;
+  }
+  .dash-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 40px;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+  }
+  .dash-left {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .dash-right {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+}
+@media (max-width: 767px) {
+  .dash-left {
+    display: none;
+  }
+  .dash-layout {
+    display: block;
+  }
+}
+
+/* ── 3D Phone Model Styles ── */
+.phone-3d-container {
+  perspective: 1200px;
+  width: 250px;
+  height: 500px;
+  z-index: 10;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.phone-3d-device {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: floatAndRotate 16s linear infinite;
+  border-radius: 40px;
+  box-shadow: -20px 30px 50px rgba(0,0,0,0.6);
+}
+
+@keyframes floatAndRotate {
+  0% {
+    transform: translateY(0px) rotateX(14deg) rotateY(0deg) rotateZ(5deg);
+  }
+  50% {
+    transform: translateY(-15px) rotateX(14deg) rotateY(180deg) rotateZ(5deg);
+  }
+  100% {
+    transform: translateY(0px) rotateX(14deg) rotateY(360deg) rotateZ(5deg);
+  }
+}
+
+.phone-3d-slice {
+  position: absolute;
+  inset: 0;
+  background: #334155; /* Space gray titanium frame */
+  border-radius: 40px;
+  border: 10px solid #334155;
+  box-sizing: border-box;
+}
+
+.phone-3d-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 40px;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+.phone-3d-front {
+  background: #020617;
+  border: 6px solid #000;
+  z-index: 2;
+}
+
+.phone-3d-back {
+  background: #0f172a;
+  border: 6px solid #000;
+  transform: rotateY(180deg);
+}
+
+/* Front Screen High-tech UI */
+.phone-3d-screen-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, #1e1b4b 0%, #020617 100%);
+  overflow: hidden;
+}
+
+.phone-3d-screen-bg::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    transparent 50%,
+    transparent 100%
+  );
+  transform: rotate(15deg) translateY(-20%);
+  pointer-events: none;
+}
+
+.phone-3d-punchhole {
+  position: absolute;
+  top: 14px;
+  width: 12px;
+  height: 12px;
+  background: #000;
+  border-radius: 50%;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 
+    inset -1px -1px 2px rgba(255,255,255,0.25),
+    0 0 0 1px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+/* Pulsing radar on front screen */
+.phone-screen-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.radar-ping {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 1px solid rgba(108, 142, 245, 0.22);
+  animation: radarPing 3s ease-out infinite;
+}
+
+@keyframes radarPing {
+  0% { transform: scale(0.6); opacity: 0.8; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.radar-scan {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 1px solid rgba(108, 142, 245, 0.1);
+  background: conic-gradient(from 0deg, rgba(108, 142, 245, 0.12), transparent 50%);
+  animation: radarRotate 4s linear infinite;
+}
+
+@keyframes radarRotate {
+  to { transform: rotate(360deg); }
+}
+
+.screen-logo {
+  z-index: 2;
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 50%;
+  padding: 12px;
+  border: 1px solid rgba(108, 142, 245, 0.2);
+  box-shadow: 0 0 15px rgba(108, 142, 245, 0.1);
+}
+
+.screen-status {
+  z-index: 2;
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 5px;
+  animation: blinkStatus 2s infinite ease-in-out;
+}
+
+@keyframes blinkStatus {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.screen-sub {
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+/* Phone Back Details */
+.phone-back-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 40px 20px;
+  box-sizing: border-box;
+}
+
+.camera-bump {
+  width: 74px;
+  height: 74px;
+  background: #1e293b;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+  position: absolute;
+  top: 25px;
+  left: 25px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 8px;
+  gap: 6px;
+  box-sizing: border-box;
+}
+
+.camera-lens {
+  background: #020617;
+  border-radius: 50%;
+  border: 1.5px solid #475569;
+  box-shadow: inset 0 2px 3px rgba(0,0,0,0.8);
+  position: relative;
+}
+
+.camera-lens::after {
+  content: '';
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.camera-flash {
+  width: 10px;
+  height: 10px;
+  background: #fef08a;
+  border-radius: 50%;
+  border: 1px solid #ca8a04;
+  align-self: center;
+  justify-self: center;
+}
+
+.back-logo {
+  opacity: 0.35;
+  margin-bottom: 20px;
+}
 </style>
 </head>
 <body>
@@ -886,57 +1162,109 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   </div>
 
   <div class="screen active" id="dashboard">
-    <div class="dash-greeting">
-      <h1>Good evening 👋</h1>
-      <p>What would you like to do today?</p>
-    </div>
-    <div class="hero-card" onclick="go('connect')">
-      <div class="hero-card-inner">
-        <div class="hero-card-icon">🔍</div>
-        <div class="hero-card-text">
-          <h2>Scan My Phone</h2>
-          <p>Detect suspicious or replaced components after a repair. Full integrity audit.</p>
+    <div class="dash-layout">
+      <!-- Left side: 3D phone model -->
+      <div class="dash-left">
+        <div class="phone-3d-container">
+          <div class="phone-3d-device" id="phone-device">
+            <!-- 3D Slices for Rounded Corner Depth -->
+            <div class="phone-3d-slice" style="transform: translateZ(-8px);"></div>
+            <div class="phone-3d-slice" style="transform: translateZ(-6px);"></div>
+            <div class="phone-3d-slice" style="transform: translateZ(-4px);"></div>
+            <div class="phone-3d-slice" style="transform: translateZ(-2px);"></div>
+            <div class="phone-3d-slice" style="transform: translateZ(0px);"></div>
+            <div class="phone-3d-slice" style="transform: translateZ(2px);"></div>
+            <div class="phone-3d-slice" style="transform: translateZ(4px);"></div>
+            <div class="phone-3d-slice" style="transform: translateZ(6px);"></div>
+
+            <!-- Front Glass -->
+            <div class="phone-3d-face phone-3d-front" style="transform: translateZ(8px);">
+              <div class="phone-3d-screen-bg">
+                <div class="phone-screen-content">
+                  <div class="radar-ping"></div>
+                  <div class="radar-scan"></div>
+                  <div class="screen-logo">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6c8ef5" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <div class="screen-status">READY TO SCAN</div>
+                  <div class="screen-sub">v0.1 · ACTIVE</div>
+                </div>
+              </div>
+              <div class="phone-3d-punchhole"></div>
+            </div>
+
+            <!-- Back Case -->
+            <div class="phone-3d-face phone-3d-back" style="transform: translateZ(-9px) rotateY(180deg);">
+              <div class="phone-back-content">
+                <div class="camera-bump">
+                  <div class="camera-lens"></div>
+                  <div class="camera-lens"></div>
+                  <div class="camera-flash"></div>
+                </div>
+                <div class="back-logo">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="hero-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
-      <span class="hero-card-tag">MAIN FEATURE</span>
-    </div>
-    <div class="grid3">
-      <div class="dash-card dc-health" onclick="go('health')">
-        <div class="card-icon">❤️</div>
-        <div class="card-title">Health Check</div>
-        <div class="card-desc">Overall health score of your phone's components</div>
-      </div>
-      <div class="dash-card dc-info" onclick="go('phoneinfo')">
-        <div class="card-icon">📱</div>
-        <div class="card-title">Phone Info</div>
-        <div class="card-desc">Full hardware details pulled from your device</div>
-      </div>
-      <div class="dash-card dc-hist" onclick="go('history')">
-        <div class="card-icon">🕘</div>
-        <div class="card-title">History</div>
-        <div class="card-desc">View all your past scans and reports</div>
-      </div>
-    </div>
-    <div class="hero-card hero-card-ba" onclick="go('ba')">
-      <div class="hero-card-inner">
-        <div class="hero-card-icon">🔄</div>
-        <div class="hero-card-text">
-          <h2>Before / After</h2>
-          <p>Compare your phone before and after repair. Save proof nothing was swapped.</p>
+
+      <!-- Right side: buttons -->
+      <div class="dash-right">
+        <div class="dash-greeting">
+          <h1>Good evening 👋</h1>
+          <p>What would you like to do today?</p>
         </div>
-        <div class="hero-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <span class="hero-card-tag">REPAIR CHECK</span>
-    </div>
-    <div class="dash-card dc-prec grid1" onclick="go('precautions')">
-      <div class="wide-card">
-        <div class="card-icon" style="margin-bottom:0">🛡️</div>
-        <div class="wide-card-text">
-          <div class="card-title">Precautions</div>
-          <div class="card-desc">How to keep your phone healthy and stay safe at repair shops</div>
+        <div class="hero-card" onclick="go('connect')">
+          <div class="hero-card-inner">
+            <div class="hero-card-icon">🔍</div>
+            <div class="hero-card-text">
+              <h2>Scan My Phone</h2>
+              <p>Detect suspicious or replaced components after a repair. Full integrity audit.</p>
+            </div>
+            <div class="hero-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+          </div>
+          <span class="hero-card-tag">MAIN FEATURE</span>
         </div>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--textd)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <div class="grid3">
+          <div class="dash-card dc-health" onclick="go('health')">
+            <div class="card-icon">❤️</div>
+            <div class="card-title">Health Check</div>
+            <div class="card-desc">Overall health score of your phone's components</div>
+          </div>
+          <div class="dash-card dc-info" onclick="go('phoneinfo')">
+            <div class="card-icon">📱</div>
+            <div class="card-title">Phone Info</div>
+            <div class="card-desc">Full hardware details pulled from your device</div>
+          </div>
+          <div class="dash-card dc-hist" onclick="go('history')">
+            <div class="card-icon">🕘</div>
+            <div class="card-title">History</div>
+            <div class="card-desc">View all your past scans and reports</div>
+          </div>
+        </div>
+        <div class="hero-card hero-card-ba" onclick="go('ba')">
+          <div class="hero-card-inner">
+            <div class="hero-card-icon">🔄</div>
+            <div class="hero-card-text">
+              <h2>Before / After</h2>
+              <p>Compare your phone before and after repair. Save proof nothing was swapped.</p>
+            </div>
+            <div class="hero-card-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+          </div>
+          <span class="hero-card-tag">REPAIR CHECK</span>
+        </div>
+        <div class="dash-card dc-prec grid1" onclick="go('precautions')">
+          <div class="wide-card">
+            <div class="card-icon" style="margin-bottom:0">🛡️</div>
+            <div class="wide-card-text">
+              <div class="card-title">Precautions</div>
+              <div class="card-desc">How to keep your phone healthy and stay safe at repair shops</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--textd)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -2739,11 +3067,32 @@ function initHoverSync() {
   });
 }
 
-// Bind hover sync setup to run when DOM is loaded
+function initMouseTracking() {
+  const container = document.querySelector('.phone-3d-container');
+  if (!container) return;
+
+  document.addEventListener('mousemove', (e) => {
+    if (container.classList.contains('zooming')) return;
+    const xAxis = (window.innerWidth / 2 - e.pageX) / 22;
+    const yAxis = (window.innerHeight / 2 - e.pageY) / 22;
+    container.style.transform = `rotateY(${-xAxis}deg) rotateX(${yAxis}deg)`;
+  });
+
+  document.addEventListener('mouseleave', () => {
+    if (container.classList.contains('zooming')) return;
+    container.style.transform = `rotateY(0deg) rotateX(0deg)`;
+  });
+}
+
+// Bind hover sync & mouse tracking setups to run when DOM is loaded
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initHoverSync);
+  document.addEventListener('DOMContentLoaded', () => {
+    initHoverSync();
+    initMouseTracking();
+  });
 } else {
   initHoverSync();
+  initMouseTracking();
 }
 </script>
 </body>
