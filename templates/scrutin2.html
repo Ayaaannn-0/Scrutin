@@ -14,6 +14,25 @@
   --grad:linear-gradient(135deg,#7c3aed,#c084fc);
   --warn:#d97706;--danger:#dc2626;--ok:#059669;
   --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+  --phone-frame:#c3bede;--phone-bezel:#1c192d;--phone-back:#eae8f7;--phone-screen-glow:#2e1065;--phone-screen-bg:#090514;
+}
+body.theme-cyberpunk {
+  --bg:#03000a;--bg2:rgba(21,16,36,0.6);--bg3:rgba(21,16,36,0.35);--bg4:#0c0817;
+  --border:rgba(16,185,129,0.2);--border2:rgba(16,185,129,0.45);
+  --text:#e2eaf8;--textd:rgba(226,234,248,0.4);--textm:rgba(226,234,248,0.7);
+  --accent:#10b981;--accent2:#8b5cf6;
+  --grad:linear-gradient(135deg,#8b5cf6,#10b981);
+  --warn:#fbbf24;--danger:#ef4444;--ok:#10b981;
+  --phone-frame:#1e1b4b;--phone-bezel:#090514;--phone-back:#0f172a;--phone-screen-glow:#064e3b;--phone-screen-bg:#022c22;
+}
+body.theme-sunset {
+  --bg:#fff5f5;--bg2:rgba(255,255,255,0.72);--bg3:rgba(255,255,255,0.48);--bg4:#ffffff;
+  --border:rgba(244,63,94,0.15);--border2:rgba(244,63,94,0.28);
+  --text:#3c0f1e;--textd:rgba(60,15,30,0.48);--textm:rgba(60,15,30,0.68);
+  --accent:#f43f5e;--accent2:#fb7185;
+  --grad:linear-gradient(135deg,#f43f5e,#fda4af);
+  --warn:#ea580c;--danger:#e11d48;--ok:#059669;
+  --phone-frame:#fecdd3;--phone-bezel:#3f0712;--phone-back:#ffe4e6;--phone-screen-glow:#4c0519;--phone-screen-bg:#1c0008;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
@@ -947,9 +966,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .phone-3d-slice {
   position: absolute;
   inset: 0;
-  background: #c3bede; /* Saturated pearlescent lavender frame */
+  background: var(--phone-frame);
   border-radius: 40px;
-  border: 14px solid #c3bede;
+  border: 14px solid var(--phone-frame);
   box-sizing: border-box;
 }
 
@@ -963,13 +982,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 .phone-3d-front {
   background: #090514;
-  border: 8px solid #1c192d; /* Thicker premium black screen bezel */
+  border: 8px solid var(--phone-bezel);
   z-index: 2;
 }
 
 .phone-3d-back {
-  background: #eae8f7;
-  border: 8px solid #c3bede; /* Thicker lavender plate edge bezel */
+  background: var(--phone-back);
+  border: 8px solid var(--phone-frame);
   transform: rotateY(180deg);
 }
 
@@ -977,7 +996,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .phone-3d-screen-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, #2e1065 0%, #090514 100%);
+  background: radial-gradient(circle at center, var(--phone-screen-glow) 0%, var(--phone-screen-bg) 100%);
   overflow: hidden;
 }
 
@@ -1712,6 +1731,72 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   font-weight: bold;
   text-shadow: 0 0 8px rgba(108, 142, 245, 0.5);
 }
+
+/* ── Theme Switcher UI ── */
+.theme-switcher {
+  position: relative;
+  display: inline-block;
+}
+.theme-btn {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.theme-btn:hover {
+  transform: scale(1.06);
+  border-color: var(--accent2);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.25);
+}
+.theme-dropdown {
+  position: absolute;
+  top: 36px;
+  right: 0;
+  background: var(--bg4);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 6px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10000;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  min-width: 120px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.theme-dropdown.show {
+  display: flex;
+  animation: ddShow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes ddShow {
+  from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.theme-opt {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--textm);
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+  text-align: left;
+}
+.theme-opt:hover {
+  background: var(--bg3);
+  color: var(--accent);
+}
 </style>
 </head>
 <body>
@@ -1726,7 +1811,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="logo-ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
       <span class="logo-txt">Scru<span>tin</span></span>
     </div>
-    <span class="ver">v0.1</span>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div class="theme-switcher">
+        <button class="theme-btn" onclick="toggleThemeMenu(event)" title="Switch Design Theme">🎨</button>
+        <div class="theme-dropdown" id="theme-dropdown">
+          <div class="theme-opt" onclick="setTheme('light')">🌸 Light Pearl</div>
+          <div class="theme-opt" onclick="setTheme('cyberpunk')">🌌 Cyberpunk</div>
+          <div class="theme-opt" onclick="setTheme('sunset')">🌅 Sunset Rose</div>
+        </div>
+      </div>
+      <span class="ver">v0.2</span>
+    </div>
   </div>
 
   <div class="screen active" id="dashboard">
@@ -3940,6 +4035,57 @@ function initBeforeAfter() {
   }
 }
 
+// ─── THEME SWITCHER LOGIC ────────────────────────────────
+let ptColor1 = '124,58,237';
+let ptColor2 = '192,132,252';
+let ptStrokeColor = '124,58,237';
+let ptStrokeAlpha = 0.045;
+
+function toggleThemeMenu(e) {
+  e.stopPropagation();
+  document.getElementById('theme-dropdown').classList.toggle('show');
+}
+
+function setTheme(theme) {
+  document.body.className = '';
+  if (theme === 'cyberpunk') {
+    document.body.classList.add('theme-cyberpunk');
+    ptColor1 = '16,185,129';
+    ptColor2 = '139,92,246';
+    ptStrokeColor = '16,185,129';
+    ptStrokeAlpha = 0.05;
+  } else if (theme === 'sunset') {
+    document.body.classList.add('theme-sunset');
+    ptColor1 = '244,63,94';
+    ptColor2 = '253,164,175';
+    ptStrokeColor = '244,63,94';
+    ptStrokeAlpha = 0.05;
+  } else {
+    // default (light lavender)
+    ptColor1 = '124,58,237';
+    ptColor2 = '192,132,252';
+    ptStrokeColor = '124,58,237';
+    ptStrokeAlpha = 0.045;
+  }
+  
+  // Re-color existing particles
+  if (pts && pts.length > 0) {
+    pts.forEach(p => {
+      p.c = Math.random() > 0.5 ? ptColor1 : ptColor2;
+    });
+  }
+  
+  localStorage.setItem('scrutin-theme', theme);
+  const dropdown = document.getElementById('theme-dropdown');
+  if (dropdown) dropdown.classList.remove('show');
+}
+
+// Close menu on click outside
+window.addEventListener('click', () => {
+  const dropdown = document.getElementById('theme-dropdown');
+  if (dropdown) dropdown.classList.remove('show');
+});
+
 // ─── PARTICLES ───────────────────────────────────────────
 const canvas=document.getElementById('cv');
 const ctx=canvas.getContext('2d');
@@ -3947,11 +4093,16 @@ let pts=[];
 function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
 resize();
 window.addEventListener('resize',resize);
-for(let i=0;i<45;i++){pts.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+0.2,a:Math.random()*0.28+0.05,c:Math.random()>.5?'124,58,237':'192,132,252'});}
+
+// Load saved theme
+const savedTheme = localStorage.getItem('scrutin-theme') || 'light';
+setTheme(savedTheme);
+
+for(let i=0;i<45;i++){pts.push({x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.2+0.2,a:Math.random()*0.28+0.05,c:Math.random()>.5?ptColor1:ptColor2});}
 function anim(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`rgba(${p.c},${p.a})`;ctx.fill();});
-  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(124,58,237,${0.045*(1-d/110)})`;ctx.lineWidth=0.5;ctx.stroke();}}
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.strokeStyle=`rgba(${ptStrokeColor},${ptStrokeAlpha*(1-d/110)})`;ctx.lineWidth=0.5;ctx.stroke();}}
   requestAnimationFrame(anim);
 }
 anim();
