@@ -75,12 +75,12 @@ def parse_battery(raw):
     if not raw:
         return data
 
-    level_match = re.search(r"\blevel:\s*(\d+)", raw)
-    health_match = re.search(r"\bhealth:\s*(\d+)", raw)
-    temp_match = re.search(r"\btemperature:\s*(\d+)", raw)
-    volt_match = re.search(r"\bvoltage:\s*(\d+)", raw)
-    tech_match = re.search(r"\btechnology:\s*([^\s]+)", raw)
-    cycle_match = re.search(r"(?:cycle count|cycle_count|cycles|Cycle count):\s*(\d+)", raw, re.IGNORECASE)
+    level_match = re.search(r"^\s*level:\s*(\d+)", raw, re.MULTILINE)
+    health_match = re.search(r"^\s*health:\s*(\d+)", raw, re.MULTILINE)
+    temp_match = re.search(r"^\s*temperature:\s*(\d+)", raw, re.MULTILINE)
+    volt_match = re.search(r"^\s*voltage:\s*(\d+)", raw, re.MULTILINE)
+    tech_match = re.search(r"^\s*technology:\s*([^\s]+)", raw, re.MULTILINE)
+    cycle_match = re.search(r"^\s*(?:cycle count|cycle_count|cycles|Cycle count):\s*(\d+)", raw, re.MULTILINE | re.IGNORECASE)
 
     if level_match:
         data["level"] = level_match.group(1)

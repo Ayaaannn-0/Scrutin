@@ -90,6 +90,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .btn-p{width:100%;padding:14px 20px;background:var(--grad);border:none;border-radius:12px;font-family:var(--font);font-size:14px;font-weight:600;color:#fff;cursor:pointer;transition:all .22s;margin-bottom:10px;box-shadow:0 4px 20px rgba(108,142,245,0.28);letter-spacing:-0.1px;}
 .btn-p:hover{box-shadow:0 6px 28px rgba(108,142,245,0.42);transform:translateY(-1px);}
 .btn-p:active{transform:scale(0.98);}
+.btn-p.pulse-glow{animation:pulseGlow 2s infinite ease-in-out;}
+@keyframes pulseGlow{
+  0%,100%{box-shadow:0 4px 20px rgba(108,142,245,0.28);transform:scale(1);}
+  50%{box-shadow:0 6px 32px rgba(108,142,245,0.6);transform:scale(1.015);}
+}
 .btn-s{width:100%;padding:13px 20px;background:rgba(255,255,255,0.04);border:1px solid var(--border2);border-radius:12px;font-family:var(--font);font-size:14px;font-weight:500;color:var(--textm);cursor:pointer;transition:all .2s;}
 .btn-s:hover{background:rgba(255,255,255,0.07);color:var(--text);}
 .nav-bk{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--textd);cursor:pointer;margin-bottom:22px;width:fit-content;background:none;border:none;font-family:var(--font);transition:color .2s;}
@@ -1945,6 +1950,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
           <div class="pw2"><div class="pf" id="pf"></div></div>
           <div class="plbl" id="plbl">0%</div>
 
+
           <!-- Live Terminal Log -->
           <div class="terminal-log">
             <div class="term-header">
@@ -2695,12 +2701,83 @@ let beforeScan = null;
 const API_BASE = window.location.port === '5000' ? '' : 'http://127.0.0.1:5000';
 let scanInProgress = false;
 
+// ─── DEVICE CONNECTION AUTO-CHECK ────────────────────────
+let deviceCheckInterval = null;
+
+function startDeviceAutoCheck() {
+  stopDeviceAutoCheck();
+  const stbar = document.getElementById('stbar');
+  const btnScan = document.getElementById('btn-start-scan');
+  if (!stbar || !btnScan) return;
+  
+  function check() {
+    const screen = document.getElementById('connect');
+    if (!screen || !screen.classList.contains('active')) {
+      stopDeviceAutoCheck();
+      return;
+    }
+    
+    fetch(API_BASE + '/check_device')
+      .then(res => {
+        if (!res.ok) throw new Error('Offline');
+        return res.json();
+      })
+      .then(data => {
+        if (data.connected) {
+          if (data.authorized) {
+            stbar.classList.add('conn');
+            stbar.querySelector('.stxt').innerHTML = `✓ Connected: <strong style="color:#fff">${data.brand} ${data.model}</strong>`;
+            btnScan.disabled = false;
+            btnScan.style.opacity = '1';
+            btnScan.classList.add('pulse-glow');
+          } else {
+            stbar.classList.remove('conn');
+            stbar.querySelector('.stxt').innerHTML = `⚠️ ${data.error || 'Device unauthorized.'}`;
+            btnScan.disabled = true;
+            btnScan.style.opacity = '0.6';
+            btnScan.classList.remove('pulse-glow');
+          }
+        } else {
+          stbar.classList.remove('conn');
+          stbar.querySelector('.stxt').textContent = 'Waiting for device connection...';
+          btnScan.disabled = true;
+          btnScan.style.opacity = '0.6';
+          btnScan.classList.remove('pulse-glow');
+        }
+      })
+      .catch(() => {
+        stbar.classList.remove('conn');
+        stbar.querySelector('.stxt').textContent = 'Server connection offline.';
+        btnScan.disabled = true;
+        btnScan.style.opacity = '0.6';
+        btnScan.classList.remove('pulse-glow');
+      });
+  }
+  
+  check();
+  deviceCheckInterval = setInterval(check, 2500);
+}
+
+function stopDeviceAutoCheck() {
+  if (deviceCheckInterval) {
+    clearInterval(deviceCheckInterval);
+    deviceCheckInterval = null;
+  }
+}
+
 // ─── NAVIGATION ──────────────────────────────────────────
 function go(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const activeScreen = document.getElementById(id);
   if (activeScreen) activeScreen.classList.add('active');
   window.scrollTo(0,0);
+  
+  if (id === 'connect') {
+    startDeviceAutoCheck();
+  } else {
+    stopDeviceAutoCheck();
+  }
+
   if(id==='det-bat') initBatteryDetail();
   if(id==='det-sto') initStorageDetail();
   if(id==='det-ram') initRAMDetail();

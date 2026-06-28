@@ -49,6 +49,39 @@ def index():
     return render_template("scrutin2.html")
 
 
+@app.route("/check_device")
+def check_device():
+    try:
+        devices = list_adb_devices()
+        if not devices:
+            return jsonify({"connected": False}), 200
+        
+        serial = devices[0]
+        brand = run_adb("getprop ro.product.brand", serial)
+        raw_model = run_adb("getprop ro.product.model", serial)
+        
+        if not brand or not raw_model:
+            # ADB saw a device but shell prop is empty (device might be unauthorized)
+            return jsonify({
+                "connected": True,
+                "authorized": False,
+                "error": "Device unauthorized. Please check your phone screen and tap 'Allow USB Debugging'."
+            }), 200
+            
+        brand = brand.capitalize()
+        model = clean_model_name(brand, raw_model)
+        
+        return jsonify({
+            "connected": True,
+            "authorized": True,
+            "brand": brand,
+            "model": model,
+            "serial": serial
+        }), 200
+    except Exception as e:
+        return jsonify({"connected": False, "error": str(e)}), 200
+
+
 @app.route("/scan")
 def scan():
     try:
